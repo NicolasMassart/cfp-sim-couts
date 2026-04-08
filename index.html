@@ -6,6 +6,7 @@
 <title>Simulateur de participation aux frais — Caen Falaise Planeurs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -125,6 +126,31 @@ footer a:hover { text-decoration: underline; }
 /* Utility */
 .hidden { display: none !important; }
 
+/* Foldable details */
+details.fold {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--white); margin-bottom: .65rem; overflow: hidden;
+}
+details.fold summary {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .75rem 1rem; cursor: pointer; list-style: none;
+  font-size: 13px; font-weight: 500; color: var(--text);
+  user-select: none;
+}
+details.fold summary::-webkit-details-marker { display: none; }
+details.fold summary::after {
+  content: '▾'; font-size: 13px; color: var(--text-muted);
+  transition: transform .2s; flex-shrink: 0; margin-left: .75rem;
+}
+details.fold[open] summary::after { transform: rotate(-180deg); }
+details.fold summary .fold-total {
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: var(--sky); margin-left: auto; margin-right: .5rem;
+}
+details.fold .fold-body { padding: 0 1rem .9rem; }
+details.fold .fold-body .breakdown td:first-child { padding-left: 2px; }
+details.fold .fold-body .breakdown tr.total td { padding-top: 8px; }
+
 
 @media (max-width: 560px) {
   .scenario-grid { grid-template-columns: 1fr; }
@@ -175,32 +201,20 @@ footer a:hover { text-decoration: underline; }
 
 <!-- ─── SCÉNARIO : ÉLÈVE ───────────────────────────────────── -->
 <div id="sc-learn" class="hidden">
-  <p class="section-label">Profil de l'élève</p>
-  <div class="toggle-group" id="learnPlaneToggle">
-    <button class="active" data-v="wood">Bois et toile</button>
-    <button data-v="plastic">Marianne / Pégase <span style="font-size:11px;opacity:.7">(tarif bois pour les non-SPL)</span></button>
-  </div>
-  <div class="toggle-group" id="learnSeasonsToggle" style="margin-top:8px;">
-    <button class="active" data-v="1">1 saison</button>
-    <button data-v="2">2 saisons</button>
-  </div>
+  <details class="fold" style="margin-bottom:1rem;">
+    <summary><span>Parcours « Apprendre à voler »</span></summary>
+    <div class="fold-body">
+      <ul style="list-style:disc;font-size:12px;line-height:2;padding-left:1rem;margin:0;">
+        <li>Tarif <strong>bois et toile</strong> · formation sur <strong>2 saisons</strong></li>
+        <li>Saison 1 (formation avec instructeur) : <strong>15 vols × 1 h</strong> en planeur pur</li>
+        <li>Saison 2 (fin de formation + 1er solo) : <strong>5 vols × 1 h</strong> avec instructeur · puis <strong>6 tours de piste × 5 min</strong> pour valider décollage/atterrissage · puis <strong>10 vols × 1 h 15</strong> en solo</li>
+        <li>Motoplaneur SF 28 (sept.–avr.) : <strong>6 h en saison 1 + 4 h en saison 2</strong> · 60 €/h · avec instructeur · instruction gratuite hors saison · sans remorquage</li>
+        <li>Remorquage moyen : <strong>10/100h</strong> par vol · <strong>5/100h</strong> pour les tours de piste</li>
+      </ul>
+    </div>
+  </details>
 
-  <p class="section-label" style="margin-top:1.25rem;">Paramètres de saison</p>
-  <div class="control-row">
-    <label>Heures de vol par saison</label>
-    <input type="range" id="learnHours" min="5" max="50" step="5" value="20" oninput="updateLearn()">
-    <span class="control-val" id="learnHoursVal">20 h</span>
-  </div>
-  <div class="control-row">
-    <label>Durée moy. de vol</label>
-    <input type="range" id="learnDur" min="0.5" max="3" step="0.5" value="1" oninput="updateLearn()">
-    <span class="control-val" id="learnDurVal">1,0 h</span>
-  </div>
-  <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:.85rem;padding-left:2px;">
-    Soit environ <strong id="learnDerivedFlights" style="color:var(--text-mid)">20 vols</strong> par saison.
-  </div>
-  <label class="check-row"><input type="checkbox" id="learnSummer" checked onchange="updateLearn()"> Vol en été (avr.–sept.) — supplément d'instruction applicable</label>
-  <label class="check-row"><input type="checkbox" id="learnBIA" onchange="updateLearn()"> J'ai mon BIA <span style="font-size:11px;color:var(--text-muted);margin-left:2px;">(Brevet d'Initiation Aéronautique — majore certaines bourses)</span></label>
+  <label class="check-row"><input type="checkbox" id="learnBIA" onchange="updateLearn()"> J'ai mon BIA <span style="font-size:11px;color:var(--text-muted);margin-left:2px;">(Brevet d'Initiation Aéronautique — majore certaines bourses FFVP)</span></label>
 
   <div class="results-section" id="learnResults"></div>
 </div>
@@ -213,15 +227,15 @@ footer a:hover { text-decoration: underline; }
     <button class="active" data-v="o25">25 ans et plus</button>
   </div>
   <div class="toggle-group" id="seasonPlaneToggle" style="margin-top:8px;">
-    <button class="active" data-v="wood">Bois et toile</button>
-    <button data-v="plastic">Pégase / Marianne</button>
+    <button data-v="wood">Bois et toile</button>
+    <button class="active" data-v="plastic">Pégase / Marianne</button>
     <button data-v="dg">DG500 / LAK19</button>
   </div>
 
   <p class="section-label" style="margin-top:1.25rem;">Paramètres de saison</p>
   <div class="control-row">
     <label>Heures de vol totales</label>
-    <input type="range" id="seasonHours" min="5" max="60" step="5" value="20" oninput="updateSeason()">
+    <input type="range" id="seasonHours" min="1" max="200" step="1" value="20" oninput="updateSeason()">
     <span class="control-val" id="seasonHoursVal">20 h</span>
   </div>
   <div class="control-row">
@@ -234,9 +248,26 @@ footer a:hover { text-decoration: underline; }
     <input type="range" id="seasonTow" min="5" max="30" step="1" value="10" oninput="updateSeason()">
     <span class="control-val" id="seasonTowVal">10 /100h</span>
   </div>
-  <label class="check-row"><input type="checkbox" id="seasonInstr" onchange="updateSeason()"> Vol avec instructeur</label>
-  <label class="check-row"><input type="checkbox" id="seasonSummer" checked onchange="updateSeason()"> Saison estivale (avr.–sept.) — supplément d'instruction applicable</label>
+  <div class="control-row">
+    <label>Heures moto-planeur <span style="font-size:11px;color:var(--text-muted)">(SF 28 · 60 €/h)</span></label>
+    <input type="range" id="seasonSf28" min="0" max="20" step="0.5" value="0" oninput="updateSeason()">
+    <span class="control-val" id="seasonSf28Val">0 h</span>
+  </div>
+  <div class="control-row">
+    <label>Heures avec instructeur <span style="font-size:11px;color:var(--text-muted)">(min. 1 vol obligatoire)</span></label>
+    <input type="range" id="seasonInstr" min="0" max="20" step="0.5" value="0.5" oninput="updateSeason()">
+    <span class="control-val" id="seasonInstrVal">30 min</span>
+  </div>
+  <div class="control-row">
+    <label>dont en saison estivale (avr.–sept.) <span style="font-size:11px;color:var(--text-muted)">(supplément instruction)</span></label>
+    <input type="range" id="seasonSummerHours" min="0" max="20" step="0.5" value="0" oninput="updateSeason()">
+    <span class="control-val" id="seasonSummerHoursVal">0 h</span>
+  </div>
 
+  <div id="seasonChartWrap" style="display:none;margin-top:1.25rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1rem .75rem;">
+    <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem;">Évolution du coût en fonction des heures volées</p>
+    <canvas id="seasonChart"></canvas>
+  </div>
   <div class="results-section" id="seasonResults"></div>
 </div>
 
@@ -350,7 +381,7 @@ const BOURSES = [
   { label: 'Pass Planeur',                                           noBIA: 150, BIA: 200,  perf: false },
   { label: 'SPL — Licence de Pilote de Planeur',                     noBIA: 150, BIA: 200,  perf: false },
   { label: 'Compétence campagne +',                                  noBIA: 300, BIA: 300,  perf: true  },
-  { label: 'Premiers 1 000 km Netcoupe (Commandant de bord)',        noBIA: 200, BIA: 200,  perf: true  },
+  { label: 'Premiers 1 000 km WeGlide (Commandant de bord)',        noBIA: 200, BIA: 200,  perf: true  },
   { label: '1er championnat officiel (régional, inter-régional, national)', noBIA: 200, BIA: 200, perf: true },
 ];
 
@@ -415,39 +446,40 @@ function flightOptions(billableH, plane, age, nonSPL) {
     pkgCost: p.pkg.h15
   });
 
-  // Forfait 30h avec coefficient (valable 1 an, payable en 3 fois)
-  const h30actual = 30 / coeff;
-  const extra30 = Math.max(0, billableH - h30actual) * rate;
-  opts.push({
-    id: 'pkg30',
-    label: 'Forfait 30h',
-    cost: p.pkg.h30 + extra30,
-    note: 'Couvre ' + fmtH(h30actual) + (billableH > h30actual ? ', +' + fmtH(billableH - h30actual) + ' à l\'heure' : ' ✓') + ' · valable 1 an',
-    pkgCost: p.pkg.h30
-  });
+  // ── Forfaits 30h renouvelables (réductions à partir du 3e) ──────────────
+  // Coût marginal de la i-ème souscription au forfait 30h (1-indexed)
+  function pkg30Inc(i) {
+    if (i <= 2) return p.pkg.h30;
+    if (i === 3) return p.pkg.h30 * 0.5;
+    return p.pkg.h30 * 0.3;
+  }
+  function pkg30TotalCost(n) {
+    let c = 0; for (let i = 1; i <= n; i++) c += pkg30Inc(i); return c;
+  }
 
-  // Forfait 30h + prolongation 10h
-  const h40actual = 40 / coeff;
-  const extra40 = Math.max(0, billableH - h40actual) * rate;
-  opts.push({
-    id: 'pkg30x',
-    label: 'Forfait 30h + prolongation 10h',
-    cost: p.pkg.h30 + p.pkg.ext10 + extra40,
-    note: 'Couvre ' + fmtH(h40actual) + (billableH > h40actual ? ', +' + fmtH(billableH - h40actual) + ' à l\'heure' : ' ✓') + ' · valable 1 an',
-    pkgCost: p.pkg.h30 + p.pkg.ext10
-  });
-
-  // 2× forfait 30h (si les heures dépassent la capacité d'un seul forfait 30h)
-  // Le 3e forfait 30h dans l'année bénéficie de 50% de réduction, le 4e et suivants de 70%
-  if (billableH > h30actual) {
-    const h2x30actual = 60 / coeff;
-    const extra2x30 = Math.max(0, billableH - h2x30actual) * rate;
+  // Combinaisons pertinentes : (n30 forfaits, k prolongations 10h)
+  // Pour n≥3, les forfaits 30h remisés (10,5 €/h ou 6,3 €/h) dominent les ext10 (21 €/h)
+  const combos30 = [[1,0],[1,1],[1,2],[2,0],[2,1],[3,0],[4,0],[5,0],[6,0],[7,0]];
+  for (const [n, k] of combos30) {
+    const coverage = (n * 30 + k * 10) / coeff;
+    const pkgCost  = pkg30TotalCost(n) + k * p.pkg.ext10;
+    const extra    = Math.max(0, billableH - coverage) * rate;
+    const coverNote = billableH > coverage
+      ? ', +' + fmtH(billableH - coverage) + ' à l\'heure' : ' ✓';
+    let label;
+    if      (n === 1 && k === 0) label = 'Forfait 30h';
+    else if (n === 1 && k === 1) label = 'Forfait 30h + prolongation 10h';
+    else if (n === 1 && k === 2) label = 'Forfait 30h + 2× prolongation 10h';
+    else if (k === 0) {
+      const disc = n === 3 ? ' (−50 % sur le 3e)' : n > 3 ? ' (−70 % sur les suivants)' : '';
+      label = n + '× forfait 30h' + disc;
+    } else {
+      label = n + '× forfait 30h + ' + (k === 1 ? 'prolongation 10h' : '2× prolongation 10h');
+    }
     opts.push({
-      id: 'pkg30x2',
-      label: '2× forfait 30h',
-      cost: 2 * p.pkg.h30 + extra2x30,
-      note: 'Couvre ' + fmtH(h2x30actual) + (billableH > h2x30actual ? ', +' + fmtH(billableH - h2x30actual) + ' à l\'heure' : ' ✓') + ' · valable 1 an chacun',
-      pkgCost: 2 * p.pkg.h30
+      id: `pkg30_${n}_${k}`, n30: n, k, coverage,
+      label, cost: pkgCost + extra, pkgCost,
+      note: 'Couvre ' + fmtH(coverage) + coverNote + ' · valable 1 an'
     });
   }
 
@@ -458,19 +490,23 @@ function flightOptions(billableH, plane, age, nonSPL) {
 function footNotes() {
   return `<div style="margin-top:1.75rem;border-top:1px solid var(--border);padding-top:1rem;">
     <p style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem;">Notes importantes</p>
-    <ul style="font-size:11.5px;color:var(--text-muted);line-height:1.7;padding-left:1.1rem;list-style:disc;">
-      <li><strong style="color:var(--text-mid)">Forfait 30h — réduction multi-forfaits :</strong> 3e forfait 30h pris dans la même année civile : <strong>−50%</strong> · 4e forfait et suivants : <strong>−70%</strong>. Contactez le club si vous atteignez ce volume.</li>
-      <li><strong style="color:var(--text-mid)">Forfait 15h :</strong> non renouvelable dans la même année civile (du 1er janvier au 31 décembre). Le forfait 30h est lui valable 1 an à partir de la date de souscription, payable en 3 fois.</li>
+    <ul style="font-size:11.5px;color:var(--text-muted);line-height:1.8;padding-left:1.1rem;list-style:disc;">
+      <li>Les heures au-delà de <strong style="color:var(--text-mid)">3h (moins de 25 ans)</strong> ou <strong style="color:var(--text-mid)">4h (25 ans et plus)</strong> lors du même vol ne nécessitent pas de participation aux frais.</li>
+      <li>Le <strong style="color:var(--text-mid)">Marianne</strong> est facturé au tarif bois et toile pour les vols d'instruction des élèves non encore brevetés SPL.</li>
+      <li>Le <strong style="color:var(--text-mid)">supplément d'instruction</strong> s'applique du 1er avril au 30 septembre uniquement — offert hors de cette période.</li>
+      <li>Le <strong style="color:var(--text-mid)">forfait 30h est renouvelable</strong> dans la même année civile : <strong style="color:var(--text-mid)">−50%</strong> sur le 3e forfait, <strong style="color:var(--text-mid)">−70%</strong> sur les suivants. Contacter le club pour en bénéficier.</li>
+      <li>Les <strong style="color:var(--text-mid)">forfaits</strong> sont payables en trois fois et valables 1 an à compter de la souscription.</li>
+      <li>Le <strong style="color:var(--text-mid)">forfait 15h***</strong> est utilisable uniquement dans l'année civile de souscription (1er janvier – 31 décembre) et n'est pas renouvelable dans la même année.</li>
+      <li>Les <strong style="color:var(--text-mid)">coûts de remorquage et de dépannage aérien</strong> sont susceptibles d'être révisés en fonction du prix du carburant.</li>
+      <li>La <strong style="color:var(--text-mid)">cotisation à la journée</strong> ne peut être délivrée qu'à un pilote de planeur inscrit dans un autre club et titulaire d'une licence FFVP obtenue par ce club.</li>
       <li><strong style="color:var(--text-mid)">Licence FFVP* :</strong> coût de base incluant RC (Responsabilité Civile Aéronef) et PJ (Protection Juridique). Options disponibles : Individuelle Accident (IA), Assistance Rapatriement (AR), Frais médicaux et thérapie sportive.</li>
-      <li><strong style="color:var(--text-mid)">Remorquage :</strong> tarif susceptible d'être révisé en fonction du prix du carburant.</li>
     </ul>
   </div>`;
 }
 
 // ── ÉTAT DE L'INTERFACE ──────────────────────────────────────────────────────
 let currentScenario = 'learn';
-let learnPlane = 'wood', learnSeasons = 1;
-let seasonAge = 'o25', seasonPlane = 'wood';
+let seasonAge = 'o25', seasonPlane = 'plastic';
 let discAge = 'u25', discPlane = 'wood';
 let visitAge = 'o25', visitPlane = 'dg';
 
@@ -498,81 +534,150 @@ function bindToggle(id, onChange) {
   });
 }
 
-// ── SCÉNARIO : ÉLÈVE ─────────────────────────────────────────────────────────
-bindToggle('learnPlaneToggle', v => { learnPlane = v; updateLearn(); });
-bindToggle('learnSeasonsToggle', v => { learnSeasons = +v; updateLearn(); });
+// ── SCÉNARIO : ÉLÈVE — paramètres fixes du parcours standard ─────────────────
+const LEARN_PARAMS = {
+  // Saison 1 : première partie de la formation instructeur
+  s1InstrFlights: 15, s1InstrDur: 1,
+  // Saison 2 — phase A : fin de la formation instructeur
+  s2InstrFlights: 5, s2InstrDur: 1,
+  // Saison 2 — phase B : 6 tours de piste (validation avant 1er solo)
+  tdpFlights: 6, tdpDur: 5/60,      // 5 min chacun
+  tdpTow: 5,                          // remorquage court : 5/100h
+  // Saison 2 — phase C : vols solo après SPL
+  soloFlights: 10, soloDur: 1.25,
+  // SF28 hivernage : 6h en saison 1, 4h en saison 2
+  sf28S1Hours: 6, sf28S2Hours: 4, sf28Rate: 60,
+  // Remorquage standard
+  towPer100h: 10,
+};
 
 function updateLearn() {
-  const hours = +document.getElementById('learnHours').value;
-  const dur = +document.getElementById('learnDur').value;
-  const isSummer = document.getElementById('learnSummer').checked;
+  const isSummer = true; // vols instructeur toujours en saison (avr.–sept.)
   const hasBIA   = document.getElementById('learnBIA').checked;
-  const nFlights = Math.max(1, Math.round(hours / dur));
-  document.getElementById('learnHoursVal').textContent = hours + ' h';
-  document.getElementById('learnDurVal').textContent = dur.toFixed(1).replace('.', ',') + ' h';
-  document.getElementById('learnDerivedFlights').textContent = nFlights + ' vols';
 
-  const age = 'u25';
-  const p = P[age];
-  const planeCalc = learnPlane === 'plastic' ? 'wood' : learnPlane;
-  const effRate = p.rates.wood;
+  const age   = 'u25';
+  const p     = P[age];
+  const plane = 'wood';
+  const fixed = p.membership.annual + p.license.annual;
 
-  const billable = billableHrs(nFlights, dur, age);
-  const instr = instrCost(billable, age, true, isSummer);
-  const tow = towCost(nFlights, 10);
-  const freeHrsSaved = nFlights * Math.max(0, dur - p.freeThreshold);
+  // ── Saison 1 : 10 vols × 1h avec instructeur ─────────────────────────────
+  const n1    = LEARN_PARAMS.s1InstrFlights;
+  const d1    = LEARN_PARAMS.s1InstrDur;
+  const b1    = billableHrs(n1, d1, age);                        // 10h
+  const i1    = instrCost(b1, age, true, isSummer);              // 80 €
+  const t1    = towCost(n1, LEARN_PARAMS.towPer100h);            // 280 €
+  const best1 = flightOptions(b1, plane, age, true)[0];
 
-  const opts1 = flightOptions(billable, planeCalc, age, true);
-  const best1 = opts1[0];
-  const fixed1 = p.membership.annual + p.license.annual;
-  const total1 = fixed1 + best1.cost + instr + tow;
+  // ── Saison 2 — phase A : 10 vols instructeur + 6 tours de piste ──────────
+  const n2a   = LEARN_PARAMS.s2InstrFlights;
+  const d2a   = LEARN_PARAMS.s2InstrDur;
+  const nTdp  = LEARN_PARAMS.tdpFlights;
+  const dTdp  = LEARN_PARAMS.tdpDur;                             // 1/3h ≈ 20 min
+  const b2a   = billableHrs(n2a, d2a, age) + billableHrs(nTdp, dTdp, age); // 10+2 = 12h
+  const i2a   = instrCost(b2a, age, true, isSummer);             // 96 € (tout avec instructeur)
+  const t2a   = towCost(n2a, LEARN_PARAMS.towPer100h) + towCost(nTdp, LEARN_PARAMS.tdpTow);
+  // ── Saison 2 — phase B : 10 vols solo × 2h ───────────────────────────────
+  const n2b   = LEARN_PARAMS.soloFlights;
+  const d2b   = LEARN_PARAMS.soloDur;
+  const b2b   = billableHrs(n2b, d2b, age);                     // 20h
+  const t2b   = towCost(n2b, LEARN_PARAMS.towPer100h);          // 280 €
 
-  const opts2 = flightOptions(billable, planeCalc, age, false);
-  const best2 = opts2[0];
-  const total2 = fixed1 + best2.cost + instr + tow;
+  // Forfait unique couvrant toute la saison 2 (encore non-SPL tout au long)
+  const b2    = b2a + b2b;
+  const best2 = flightOptions(b2, plane, age, true)[0];         // nonSPL = true
 
-  const seasons = learnSeasons;
-  const grandTotal = total1 + (seasons > 1 ? total2 : 0);
+  // Séparation forfait de base / heures supplémentaires pour affichage
+  const s1PkgBase  = best1.pkgCost ?? best1.cost;
+  const s1PkgExtra = best1.cost - s1PkgBase;
+  const s2PkgBase  = best2.pkgCost ?? best2.cost;
+  const s2PkgExtra = best2.cost - s2PkgBase;
+
+  // ── SF28 hivernage — réparti sur les 2 saisons ───────────────────────────
+  const sf28Cost1  = LEARN_PARAMS.sf28S1Hours * LEARN_PARAMS.sf28Rate; // 360 €
+  const sf28Cost2  = LEARN_PARAMS.sf28S2Hours * LEARN_PARAMS.sf28Rate; // 240 €
+
+  const eLearning = p.eLearning; // 50 € — formation théorique (examen SPL)
+  const total1 = fixed + best1.cost + i1 + t1 + sf28Cost1 + eLearning;
+  const total2 = fixed + best2.cost + i2a + t2a + t2b + sf28Cost2;
+  const grandTotal = total1 + total2;
+  const totalHours = n1*d1 + n2a*d2a + nTdp*dTdp + n2b*d2b
+                   + LEARN_PARAMS.sf28S1Hours + LEARN_PARAMS.sf28S2Hours;
+
 
   let html = '';
 
-  if (dur > p.freeThreshold) {
-    html += `<div class="info-box green-box"><strong>Règle des heures gratuites :</strong> Pour les moins de 25 ans, au-delà de ${fmtH(p.freeThreshold)} par vol, pas de participation aux frais. Avec des vols de ${fmtH(dur)} en moyenne, vous économisez <strong>${fmt(freeHrsSaved * effRate)}</strong> par saison sur les heures de vol.</div>`;
-  }
-
-  html += buildSeasonBlock('Saison 1 — Avant le brevet SPL', age, fixed1, best1, instr, tow, billable, nFlights);
-  if (seasons > 1) {
-    html += buildSeasonBlock('Saison 2 — Après le brevet SPL (nouvelle licence)', age, fixed1, best2, instr, tow, billable, nFlights);
-  }
-
-  html += `<div class="metrics">
+  // ── Totaux en premier ─────────────────────────────────────────────────────
+  html += `<div class="metrics" style="margin-top:1.25rem;grid-template-columns:1fr 1fr 1fr;">
     <div class="metric-card accent">
-      <p class="metric-label">Total (${seasons} saison${seasons > 1 ? 's' : ''})</p>
+      <p class="metric-label">Total formation (2 saisons)</p>
       <p class="metric-value">${fmt(grandTotal)}</p>
-      <p class="metric-sub">${fmt(grandTotal / (seasons * hours))} par heure de vol</p>
+      <p class="metric-sub">${fmt(grandTotal / totalHours)} par heure · ${fmtH(totalHours)} h au total</p>
     </div>
-    <div class="metric-card green">
-      <p class="metric-label">Par saison</p>
+    <div class="metric-card">
+      <p class="metric-label">Saison 1</p>
       <p class="metric-value">${fmt(total1)}</p>
-      <p class="metric-sub">${seasons > 1 ? 'Saison 2 : ' + fmt(total2) : 'Coût annuel'}</p>
+      <p class="metric-sub">Formation initiale en moto-planeur incluse</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Saison 2</p>
+      <p class="metric-value">${fmt(total2)}</p>
+      <p class="metric-sub">Formation initiale en moto-planeur incluse</p>
     </div>
   </div>`;
 
-  if (!isSummer) {
-    html += `<div class="info-box"><strong>Avantage vol hivernal :</strong> Le supplément d'instruction (${p.instrRate} €/h) n'est pas applicable hors avril–septembre. Vous économisez ${fmt(billable * p.instrRate)} par saison.</div>`;
-  }
+  // ── Saison 1 — détail replié ──────────────────────────────────────────────
+  html += `
+  <details class="fold">
+    <summary>
+      <span>Saison 1 — Formation instructeur · 15 vols × 1 h + SF 28 ${LEARN_PARAMS.sf28S1Hours} h</span>
+      <span class="fold-total">${fmt(total1)}</span>
+    </summary>
+    <div class="fold-body">
+    <table class="breakdown">
+      <tr><td>Cotisation annuelle</td><td>${fmt(p.membership.annual)}</td></tr>
+      <tr><td>Licence FFVP annuelle</td><td>${fmt2(p.license.annual)}</td></tr>
+      <tr><td>Formation théorique <span style="font-size:11px;color:var(--text-muted)">(e-learning · examen SPL)</span></td><td>${fmt(eLearning)}</td></tr>
+      <tr class="section-head"><td colspan="2">Heures de vol — planeur pur (bois et toile)</td></tr>
+      <tr><td>${best1.label}</td><td>${fmt(s1PkgBase)}</td></tr>
+      ${s1PkgExtra > 0 ? `<tr><td>Heures supplémentaires <span style="font-size:11px;color:var(--text-muted)">${fmtH(s1PkgExtra / p.rates[plane])} au tarif horaire</span></td><td>${fmt(s1PkgExtra)}</td></tr>` : ''}
+      <tr><td>Instruction <span style="font-size:11px;color:var(--text-muted)">${fmtH(b1)} × ${p.instrRate} €/h</span></td><td>${fmt(i1)}</td></tr>
+      <tr><td>Remorquage <span style="font-size:11px;color:var(--text-muted)">${n1} vols × 10/100h</span></td><td>${fmt(t1)}</td></tr>
+      <tr><td>Motoplaneur SF 28 <span style="font-size:11px;color:var(--text-muted)">${LEARN_PARAMS.sf28S1Hours} h × ${LEARN_PARAMS.sf28Rate} €/h · décollage autonome sans remorquage</span></td><td>${fmt(sf28Cost1)}</td></tr>
+      <tr class="total"><td>Total saison 1</td><td>${fmt(total1)}</td></tr>
+    </table>
+    </div>
+  </details>`;
 
-  html += `<p class="section-label">Comparaison des forfaits — Saison 1</p>`;
-  html += buildCompareTable(opts1, fixed1 + instr + tow);
+  // ── Saison 2 — détail replié ──────────────────────────────────────────────
+  html += `
+  <details class="fold">
+    <summary>
+      <span>Saison 2 — Fin de formation + 1er solo (10 × 1h15) + SF 28 ${LEARN_PARAMS.sf28S2Hours} h</span>
+      <span class="fold-total">${fmt(total2)}</span>
+    </summary>
+    <div class="fold-body">
+    <table class="breakdown">
+      <tr><td>Cotisation annuelle</td><td>${fmt(p.membership.annual)}</td></tr>
+      <tr><td>Licence FFVP annuelle</td><td>${fmt2(p.license.annual)}</td></tr>
+      <tr class="section-head"><td colspan="2">Heures de vol — planeur pur (bois et toile)</td></tr>
+      <tr><td>${best2.label}</td><td>${fmt(s2PkgBase)}</td></tr>
+      ${s2PkgExtra > 0 ? `<tr><td>Heures supplémentaires <span style="font-size:11px;color:var(--text-muted)">${fmtH(s2PkgExtra / p.rates[plane])} au tarif horaire</span></td><td>${fmt(s2PkgExtra)}</td></tr>` : ''}
+      <tr><td>Instruction <span style="font-size:11px;color:var(--text-muted)">${fmtH(b2a)} × ${p.instrRate} €/h · vols avec instructeur uniquement</span></td><td>${fmt(i2a)}</td></tr>
+      <tr><td>Remorquage <span style="font-size:11px;color:var(--text-muted)">${n2a} vols × 10/100h · ${nTdp} tours de piste × ${LEARN_PARAMS.tdpTow}/100h · ${n2b} vols solo × 10/100h</span></td><td>${fmt(t2a + t2b)}</td></tr>
+      <tr><td>Motoplaneur SF 28 <span style="font-size:11px;color:var(--text-muted)">${LEARN_PARAMS.sf28S2Hours} h × ${LEARN_PARAMS.sf28Rate} €/h · décollage autonome sans remorquage</span></td><td>${fmt(sf28Cost2)}</td></tr>
+      <tr class="total"><td>Total saison 2</td><td>${fmt(total2)}</td></tr>
+    </table>
+    </div>
+  </details>`;
 
-  // ── Bourses FFVP ──────────────────────────────────────────────────────────
-  const training = BOURSES.filter(b => !b.perf);
-  const perf     = BOURSES.filter(b =>  b.perf);
-  const totalBourses = BOURSES.reduce((s, b) => s + (hasBIA ? b.BIA : b.noBIA), 0);
+  // ── Bourses FFVP — formation ──────────────────────────────────────────────
+  const training     = BOURSES.filter(b => !b.perf);
+  const perf         = BOURSES.filter(b =>  b.perf);
   const totalTraining = training.reduce((s, b) => s + (hasBIA ? b.BIA : b.noBIA), 0);
+  const totalPerf     = perf.reduce((s, b) => s + (hasBIA ? b.BIA : b.noBIA), 0);
 
   const bourseRows = items => items.map(b => {
-    const amount = hasBIA ? b.BIA : b.noBIA;
+    const amount  = hasBIA ? b.BIA : b.noBIA;
     const biaMark = hasBIA && b.BIA > b.noBIA
       ? ` <span style="font-size:11px;color:var(--green);font-weight:600;">+${b.BIA - b.noBIA} € avec BIA</span>`
       : '';
@@ -582,51 +687,70 @@ function updateLearn() {
     </li>`;
   }).join('');
 
-  html += `<p class="section-label">Bourses FFVP applicables</p>
-  <div style="background:var(--green-light);border:1px solid #a8d9c0;border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1rem;">
-    <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:.6rem;">Jalons de formation — versés par la FFVP à l'atteinte de chaque étape :</p>
-    <ul style="list-style:none;padding:0;margin:0 0 .75rem;">
-      ${bourseRows(training)}
-    </ul>
-    <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:.6rem;margin-top:.5rem;border-top:1px solid #a8d9c0;padding-top:.6rem;">Aides à la performance — après l'obtention du SPL :</p>
-    <ul style="list-style:none;padding:0;margin:0;">
-      ${bourseRows(perf)}
-    </ul>
-  </div>
-
-  <div class="metrics">
+  html += `<div class="metrics">
     <div class="metric-card accent">
-      <p class="metric-label">Total (${seasons} saison${seasons > 1 ? 's' : ''})</p>
+      <p class="metric-label">Total formation (2 saisons)</p>
       <p class="metric-value">${fmt(grandTotal)}</p>
       <p class="metric-sub">Hors bourses</p>
     </div>
     <div class="metric-card green">
-      <p class="metric-label">Total bourses FFVP comprises</p>
-      <p class="metric-value">${fmt(Math.max(0, grandTotal - totalBourses))}</p>
-      <p class="metric-sub">Après −${fmt(totalBourses)} de bourses${hasBIA ? ' (BIA)' : ''}</p>
+      <p class="metric-label">Avec bourses de formation FFVP</p>
+      <p class="metric-value">${fmt(Math.max(0, grandTotal - totalTraining))}</p>
+      <p class="metric-sub">Après −${fmt(totalTraining)} de bourses${hasBIA ? ' (BIA)' : ''}</p>
     </div>
-  </div>`;
+  </div>
+
+  <details class="fold">
+    <summary>
+      <span>Bourses FFVP — jalons de formation</span>
+      <span class="fold-total" style="color:var(--green)">−${fmt(totalTraining)}</span>
+    </summary>
+    <div class="fold-body">
+      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:.6rem;">Versées par la FFVP à l'atteinte de chaque étape :</p>
+      <ul style="list-style:none;padding:0;margin:0;">
+        ${bourseRows(training)}
+      </ul>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary>
+      <span>Aides à la performance FFVP — après SPL</span>
+      <span class="fold-total" style="color:var(--green)">jusqu'à −${fmt(totalPerf)}</span>
+    </summary>
+    <div class="fold-body">
+      <p style="font-size:11.5px;color:var(--text-mid);margin-bottom:.6rem;">Disponibles après l'obtention du SPL, sur plusieurs saisons :</p>
+      <ul style="list-style:none;padding:0;margin:0;">
+        ${bourseRows(perf)}
+      </ul>
+    </div>
+  </details>`;
 
   html += footNotes();
   document.getElementById('learnResults').innerHTML = html;
 }
 
-function buildSeasonBlock(label, age, fixed, bestOpt, instr, tow, billable, nFlights) {
+function buildSeasonBlock(label, age, fixed, bestOpt, instr, tow, billable, nFlights, sf28Cost) {
   const p = P[age];
   const instrLabel = instr > 0
     ? `Instruction (${fmtH(billable)} × ${p.instrRate} €/h)`
     : 'Supplément d\'instruction';
   const instrVal = instr > 0 ? fmt(instr) : 'Gratuit (hors saison)';
+  const sf28Row = sf28Cost != null
+    ? `<tr><td>Motoplaneur SF 28 — 10 h × 60 €/h <span style="font-size:11px;color:var(--text-muted)">(tarif officiel plein régime : 80 €/h · sans remorquage)</span></td><td>${fmt(sf28Cost)}</td></tr>`
+    : '';
+  const total = fixed + bestOpt.cost + instr + tow + (sf28Cost ?? 0);
   return `
   <p class="section-label">${label}</p>
   <table class="breakdown">
     <tr><td>Cotisation annuelle</td><td>${fmt(p.membership.annual)}</td></tr>
     <tr><td>Licence FFVP annuelle</td><td>${fmt2(p.license.annual)}</td></tr>
-    <tr class="section-head"><td colspan="2">Heures de vol</td></tr>
+    <tr class="section-head"><td colspan="2">Heures de vol — planeur</td></tr>
     <tr><td>${bestOpt.label} <span style="font-size:11px;color:var(--text-muted)">${bestOpt.note}</span></td><td>${fmt(bestOpt.cost)}</td></tr>
     <tr><td>${instrLabel}</td><td>${instrVal}</td></tr>
     <tr><td>Remorquage (${nFlights} vols × 10/100h)</td><td>${fmt(tow)}</td></tr>
-    <tr class="total"><td>Total saison</td><td>${fmt(fixed + bestOpt.cost + instr + tow)}</td></tr>
+    ${sf28Row}
+    <tr class="total"><td>Total saison</td><td>${fmt(total)}</td></tr>
   </table>`;
 }
 
@@ -654,12 +778,170 @@ function buildCompareTable(opts, fixed) {
 bindToggle('seasonAgeToggle', v => { seasonAge = v; updateSeason(); });
 bindToggle('seasonPlaneToggle', v => { seasonPlane = v; updateSeason(); });
 
+let seasonChartInst = null;
+function updateSeasonChart(p, plane, age, hours, dur, instrHours, instrHoursSummer, soloHours, towPer100h, fixed, sf28CostTotal, towTotal) {
+  const wrap = document.getElementById('seasonChartWrap');
+  const ctx = document.getElementById('seasonChart');
+  if (!ctx) return;
+  wrap.style.display = '';
+
+  const xLabels = [], fixedArr = [], forfaitArr = [], extraArr = [], towArr = [], instrArr = [], sf28Arr = [], lineArr = [];
+
+  // Precompute the forfait chosen for the TOTAL planned hours — paid upfront, flat on the chart
+  const billableRatio = Math.min(1, p.freeThreshold / Math.max(dur, 0.01));
+  const rate = p.rates[plane];
+  const totalBillable = instrHours + soloHours * billableRatio;
+  const bestFinal = flightOptions(totalBillable, plane, age, false)[0];
+
+  // Coverage thresholds for pkg15 options
+  const coeff = COEFF[plane];
+  const cov15 = 15 / coeff;
+  const cov30 = 30 / coeff; // single-pkg30 threshold, used in step loop
+
+  // Marginal cost of i-th pkg30 subscription (must mirror flightOptions.pkg30Inc)
+  function pkg30IncChart(i) {
+    if (i <= 2) return p.pkg.h30;
+    if (i === 3) return p.pkg.h30 * 0.5;
+    return p.pkg.h30 * 0.3;
+  }
+
+  // Step-function: cumulative package cost at billable hour bx
+  // For pkg30 combos: buy each pkg30 at successive cov30 thresholds, then ext10s after
+  function forfaitAtBx(bx) {
+    if (bestFinal.n30 !== undefined) {
+      const { n30, k } = bestFinal;
+      let cumCost = 0, cov = 0;
+      for (let i = 1; i <= n30; i++) {
+        if (bx >= cov) cumCost += pkg30IncChart(i);
+        cov += cov30;
+      }
+      for (let j = 1; j <= k; j++) {
+        if (bx >= cov) cumCost += p.pkg.ext10;
+        cov += 10 / coeff;
+      }
+      return cumCost;
+    }
+    switch (bestFinal.id) {
+      case 'pkg15':  return p.pkg.h15;
+      case 'pkg15w': return p.pkg.w15nonSPL;
+      default:       return 0; // hourly — no flat package
+    }
+  }
+  function extraAtBx(bx) {
+    if (bestFinal.n30 !== undefined) {
+      return Math.max(0, bx - bestFinal.coverage) * rate;
+    }
+    switch (bestFinal.id) {
+      case 'pkg15':  return Math.max(0, bx - cov15) * rate;
+      case 'pkg15w': { const c = p.pkg.w15nonSPL / (p.pkg.h15 / cov15); return Math.max(0, bx - c) * rate; }
+      default:       return bx * rate; // hourly — all cost is per-hour
+    }
+  }
+
+  for (let x = 1; x <= hours; x++) {
+    const frac = x / hours;
+    xLabels.push(x);
+
+    const bx = instrHours * frac + soloHours * frac * billableRatio;
+
+    const forfait_x = forfaitAtBx(bx);
+    const extra_x   = extraAtBx(bx);
+    const instr_x   = instrHoursSummer * frac * p.instrRate;
+    const sf28_x    = sf28CostTotal * frac;
+    const tow_x     = towTotal * frac;
+
+    const total_x = fixed + forfait_x + extra_x + instr_x + sf28_x + tow_x;
+
+    fixedArr.push(fixed);
+    forfaitArr.push(forfait_x);
+    extraArr.push(extra_x);
+    towArr.push(tow_x);
+    instrArr.push(instr_x);
+    sf28Arr.push(sf28_x);
+    lineArr.push(total_x / x);
+  }
+
+  const bar = (label, data, color) => ({
+    type: 'bar', label, data, backgroundColor: color, stack: 'cost', yAxisID: 'y', borderWidth: 0, order: 2
+  });
+
+  const datasets = [
+    bar('Cotisation & licence', fixedArr, '#94a3b8'),
+    bar('Forfait', forfaitArr, '#3b82f6'),
+    bar('Heures hors forfait', extraArr, '#93c5fd'),
+    bar('Remorquage', towArr, '#8b5cf6'),
+    bar('Instruction (été)', instrArr, '#f59e0b'),
+    bar('Moto-planeur SF 28', sf28Arr, '#10b981'),
+    {
+      type: 'line', label: 'Coût moyen / heure',
+      data: lineArr, yAxisID: 'y1',
+      borderColor: '#ef4444', borderDash: [5, 3], borderWidth: 2,
+      pointRadius: 0, tension: 0.3, fill: false, order: 0
+    }
+  ];
+
+  const chartData = { labels: xLabels, datasets };
+  const options = {
+    responsive: true, maintainAspectRatio: true, aspectRatio: 2.4,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10, boxWidth: 12 } },
+      tooltip: {
+        callbacks: {
+          title: items => items[0].label + 'h de vol',
+          label: c => {
+            if (!c.raw || c.raw === 0) return null;
+            const suffix = c.dataset.yAxisID === 'y1' ? ' €/h' : ' €';
+            return ` ${c.dataset.label} : ${c.raw.toFixed(0)}${suffix}`;
+          },
+          footer: items => {
+            const barItems = items.filter(i => i.dataset.yAxisID === 'y');
+            const total = barItems.reduce((s, i) => s + (i.raw || 0), 0);
+            return total > 0 ? 'Total cumulé : ' + total.toFixed(0) + ' €' : null;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        title: { display: true, text: 'Heures de vol', font: { size: 10 } },
+        ticks: { font: { size: 10 }, maxTicksLimit: 13, callback: (v, i) => xLabels[i] + 'h' }
+      },
+      y: {
+        stacked: true, position: 'left',
+        title: { display: true, text: 'Coût cumulé (€)', font: { size: 10 } },
+        ticks: { font: { size: 10 }, callback: v => v + ' €' },
+        grid: { color: '#f1f5f9' }
+      },
+      y1: {
+        position: 'right',
+        title: { display: true, text: '€ / heure', font: { size: 10 } },
+        ticks: { font: { size: 10 }, callback: v => v.toFixed(0) + ' €' },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  };
+
+  if (seasonChartInst) {
+    seasonChartInst.data = chartData;
+    seasonChartInst.options = options;
+    seasonChartInst.update('none');
+  } else {
+    seasonChartInst = new Chart(ctx, { type: 'bar', data: chartData, options });
+  }
+}
+
+function fmtSliderH(h) {
+  if (h === 0) return '0 h';
+  if (h < 1) return (h * 60) + ' min';
+  return h % 1 === 0 ? h + ' h' : h.toFixed(1).replace('.', ',') + ' h';
+}
+
 function updateSeason() {
   const hours = +document.getElementById('seasonHours').value;
   const dur = +document.getElementById('seasonDur').value;
   const towPer100h = +document.getElementById('seasonTow').value;
-  const withInstr = document.getElementById('seasonInstr').checked;
-  const isSummer = document.getElementById('seasonSummer').checked;
   document.getElementById('seasonHoursVal').textContent = hours + ' h';
   document.getElementById('seasonDurVal').textContent = dur.toFixed(1).replace('.', ',') + ' h';
   document.getElementById('seasonTowVal').textContent = towPer100h + ' /100h';
@@ -667,21 +949,57 @@ function updateSeason() {
   const age = seasonAge;
   const plane = seasonPlane;
   const p = P[age];
-  const nFlights = Math.max(1, Math.round(hours / dur));
-  const billable = billableHrs(nFlights, dur, age);
-  const instr = instrCost(billable, age, withInstr, isSummer);
+
+  // Slider "heures avec instructeur" : min 0.5h, max = total heures — lu en premier
+  const instrEl = document.getElementById('seasonInstr');
+  instrEl.max = hours;
+  const instrHours = Math.min(Math.max(0.5, +instrEl.value), hours);
+  instrEl.value = instrHours;
+  document.getElementById('seasonInstrVal').textContent = fmtSliderH(instrHours);
+
+  // Slider "dont en saison estivale" : même range que le slider instructeur (max = hours), valeur plafonnée à instrHours
+  const summerEl = document.getElementById('seasonSummerHours');
+  summerEl.max = hours;
+  const instrHoursSummer = Math.min(Math.max(0, +summerEl.value), instrHours);
+  summerEl.value = instrHoursSummer;
+  const instrHoursWinter = instrHours - instrHoursSummer;
+  document.getElementById('seasonSummerHoursVal').textContent = fmtSliderH(instrHoursSummer);
+
+  // Slider moto-planeur
+  const sf28Hours = +document.getElementById('seasonSf28').value;
+  document.getElementById('seasonSf28Val').textContent = fmtSliderH(sf28Hours);
+  const sf28Cost = sf28Hours * 60; // 60 €/h tarif hiver
+
+  // Heures solo et calcul des vols
+  const soloHours = Math.max(0, hours - instrHours);
+  const soloFlights = Math.max(0, Math.round(soloHours / dur));
+  const instrFlights = Math.max(1, Math.round(instrHours / dur));
+  const nFlights = instrFlights + soloFlights;
+
+  // Heures facturables : instructeur = toujours facturé plein (pas de règle heure gratuite)
+  const instrBillable = instrHours;
+  const soloBillable = billableHrs(soloFlights, dur, age);
+  const billable = instrBillable + soloBillable;
+  const freeHrs = soloFlights * Math.max(0, dur - p.freeThreshold);
+
+  // Supplément instruction : uniquement sur les heures instructeur en saison estivale
+  const instr = instrHoursSummer * p.instrRate;
+  const instrSaving = instrHoursWinter * p.instrRate; // économie grâce aux vols hiver
   const tow = towCost(nFlights, towPer100h);
   const fixed = p.membership.annual + p.license.annual;
-  const freeHrs = nFlights * Math.max(0, dur - p.freeThreshold);
 
   const opts = flightOptions(billable, plane, age, false);
   const best = opts[0];
-  const totalBest = fixed + best.cost + instr + tow;
+  const totalBest = fixed + best.cost + instr + tow + sf28Cost;
 
   let html = '';
 
   if (freeHrs > 0) {
-    html += `<div class="info-box green-box"><strong>Règle des heures gratuites :</strong> Au-delà de ${fmtH(p.freeThreshold)} par vol, pas de participation aux frais. Vous ne payez que ${fmtH(billable)} au lieu de ${fmtH(hours)}. Économie : <strong>${fmt(freeHrs * p.rates[plane])}</strong>.</div>`;
+    html += `<div class="info-box green-box"><strong>Règle des heures gratuites :</strong> Au-delà de ${fmtH(p.freeThreshold)} par vol solo, pas de participation aux frais. Vous ne payez que ${fmtH(soloBillable)} au lieu de ${fmtH(soloHours)} en solo. Économie : <strong>${fmt(freeHrs * p.rates[plane])}</strong>.</div>`;
+  }
+
+  if (instrSaving > 0) {
+    html += `<div class="info-box green-box"><strong>Avantage hiver :</strong> ${fmtH(instrHoursWinter)} avec instructeur hors saison estivale → pas de supplément instruction. Économie : <strong>${fmt(instrSaving)}</strong>.</div>`;
   }
 
   html += `<div class="metrics">
@@ -692,42 +1010,63 @@ function updateSeason() {
     </div>
     <div class="metric-card">
       <p class="metric-label">Coût par heure de vol</p>
-      <p class="metric-value">${fmt(totalBest / Math.max(billable, 1))}</p>
-      <p class="metric-sub">~${nFlights} vols de ${fmtH(dur)}</p>
+      <p class="metric-value">${fmt(totalBest / Math.max(hours, 1))}</p>
+      <p class="metric-sub">~${nFlights} vols · ${fmtH(instrHoursSummer)} instr. été / ${fmtH(instrHoursWinter)} instr. hiver</p>
     </div>
   </div>`;
 
-  html += `<table class="breakdown">
-    <tr><td>Cotisation annuelle</td><td>${fmt(p.membership.annual)}</td></tr>
-    <tr><td>Licence FFVP annuelle</td><td>${fmt2(p.license.annual)}</td></tr>
-    <tr class="section-head"><td colspan="2">Coûts variables (meilleure option)</td></tr>
-    <tr><td>${best.label} <span style="font-size:11px;color:var(--text-muted)">${best.note}</span></td><td>${fmt(best.cost)}</td></tr>
-    ${withInstr ? `<tr><td>Instruction (${fmtH(billable)} × ${p.instrRate} €/h${!isSummer ? ' — gratuit hors avr.–sept.' : ''})</td><td>${fmt(instr)}</td></tr>` : ''}
-    <tr><td>Remorquage (~${nFlights} vols × ${towPer100h}/100h)</td><td>${fmt(tow)}</td></tr>
-    <tr class="total"><td>Total saison</td><td>${fmt(totalBest)}</td></tr>
-  </table>`;
+  const instrNote = instrHoursWinter > 0
+    ? `${fmtH(instrHoursSummer)} été (payant) · ${fmtH(instrHoursWinter)} hiver (gratuit)`
+    : `${fmtH(instrHoursSummer)} en été`;
+  const sf28Row = sf28Cost > 0
+    ? `<tr><td>Moto-planeur SF 28 (${fmtH(sf28Hours)} × 60 €/h)</td><td>${fmt(sf28Cost)}</td></tr>`
+    : '';
 
-  html += `<p class="section-label">Comparaison de tous les forfaits</p>`;
-  html += buildCompareTable(opts, fixed + instr + tow);
+  // Détail des coûts — panneau replié
+  html += `<details class="fold" style="margin-top:1rem;">
+    <summary>Détail des coûts <span class="fold-total">${fmt(totalBest)}</span></summary>
+    <div class="fold-body">
+      <table class="breakdown">
+        <tr><td>Cotisation annuelle</td><td>${fmt(p.membership.annual)}</td></tr>
+        <tr><td>Licence FFVP annuelle</td><td>${fmt2(p.license.annual)}</td></tr>
+        <tr><td>${best.label} <span style="font-size:11px;color:var(--text-muted)">${best.note}</span></td><td>${fmt(best.cost)}</td></tr>
+        <tr><td>Instruction <span style="font-size:11px;color:var(--text-muted)">${instrNote}</span></td><td>${fmt(instr)}</td></tr>
+        <tr><td>Remorquage (~${nFlights} vols × ${towPer100h}/100h)</td><td>${fmt(tow)}</td></tr>
+        ${sf28Row}
+        <tr class="total"><td>Total saison</td><td>${fmt(totalBest)}</td></tr>
+      </table>
+    </div>
+  </details>`;
+
+  // Comparaison des forfaits — panneau replié
+  html += `<details class="fold">
+    <summary>Comparaison de tous les forfaits</summary>
+    <div class="fold-body">`;
+  html += buildCompareTable(opts, fixed + instr + tow + sf28Cost);
 
   const be15h = p.pkg.h15 / p.rates[plane];
   const be30h = p.pkg.h30 / p.rates[plane];
 
   if (billable < be15h) {
-    html += `<div class="info-box amber-box">Pour ${fmtH(billable)} facturables, le paiement à l'heure est en réalité moins cher que le forfait 15h (seuil de rentabilité : ${fmtH(be15h)}). Un forfait n'est rentable qu'à partir d'un certain volume de vol.</div>`;
+    html += `<div class="info-box amber-box" style="margin-top:.75rem;">Pour ${fmtH(billable)} facturables, le paiement à l'heure est en réalité moins cher que le forfait 15h (seuil de rentabilité : ${fmtH(be15h)}). Un forfait n'est rentable qu'à partir d'un certain volume de vol.</div>`;
   } else if (best.id === 'pkg15' || best.id === 'pkg15w') {
-    html += `<div class="info-box green-box">Le forfait 15h est votre meilleure option. Le seuil de rentabilité avec le paiement à l'heure est à ${fmtH(be15h)}, et le forfait 30h n'est intéressant qu'à partir de ${fmtH(be30h)} heures facturables.</div>`;
-  } else if (best.id === 'pkg30' || best.id === 'pkg30x2') {
-    html += `<div class="info-box green-box">Pour ${fmtH(billable)}, le forfait 30h est votre meilleure option (seuil de rentabilité vs paiement à l'heure à ${fmtH(be30h)}).</div>`;
+    html += `<div class="info-box green-box" style="margin-top:.75rem;">Le forfait 15h est votre meilleure option. Le seuil de rentabilité avec le paiement à l'heure est à ${fmtH(be15h)}, et le forfait 30h n'est intéressant qu'à partir de ${fmtH(be30h)} heures facturables.</div>`;
+  } else if (best.id && best.id.startsWith('pkg30')) {
+    html += `<div class="info-box green-box" style="margin-top:.75rem;">Pour ${fmtH(billable)}, le forfait 30h est votre meilleure option (seuil de rentabilité vs paiement à l'heure à ${fmtH(be30h)}).</div>`;
   }
 
-  // Note réduction 3e forfait 30h si volume élevé
-  if (billable > 30 / COEFF[plane]) {
-    html += `<div class="info-box amber-box"><strong>Réduction multi-forfaits :</strong> si c'est votre 3e forfait 30h dans l'année civile, vous bénéficiez de <strong>50% de réduction</strong> (4e et suivants : 70%). Contactez le club pour en bénéficier.</div>`;
+  if (best.n30 >= 3) {
+    html += `<div class="info-box amber-box" style="margin-top:.5rem;"><strong>Réduction multi-forfaits incluse :</strong> le simulateur applique <strong>${best.n30 === 3 ? '−50 %' : '−70 %'}</strong> sur le ${best.n30 === 3 ? '3e' : best.n30 + 'e'} forfait 30h. Contactez le club pour en bénéficier — ce n'est pas automatique.</div>`;
+  } else if (billable > 30 / COEFF[plane]) {
+    html += `<div class="info-box amber-box" style="margin-top:.5rem;"><strong>Réduction disponible :</strong> à partir du 3e forfait 30h dans la même année civile, vous bénéficiez de <strong>−50 %</strong> (4e et suivants : −70 %). Le simulateur en tient compte automatiquement si nécessaire.</div>`;
   }
 
+  html += `</div></details>`;
   html += footNotes();
   document.getElementById('seasonResults').innerHTML = html;
+
+  // Graphique évolution horaire
+  updateSeasonChart(p, plane, age, hours, dur, instrHours, instrHoursSummer, soloHours, towPer100h, fixed, sf28Cost, tow);
 }
 
 // ── SCÉNARIO : DÉCOUVERTE ────────────────────────────────────────────────────
