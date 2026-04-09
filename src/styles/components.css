@@ -1,0 +1,471 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   components.css — Reusable UI components
+   Every class here maps to one visual building block.
+   Depends on: variables.css
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION LABEL
+   Small uppercase caption above groups of controls or results.
+   Usage: <p class="section-label">…</p>
+══════════════════════════════════════════════════════════════════════════ */
+.section-label {
+  font-size:      10px;
+  font-weight:    500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  margin:         1.75rem 0 .6rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCENARIO CARDS
+   2-column grid of clickable scenario selectors at the top of the page.
+   JS adds/removes .active on click.
+══════════════════════════════════════════════════════════════════════════ */
+.scenario-grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   10px;
+  margin-bottom:         1.5rem;
+}
+
+.scenario-card {
+  background:    var(--white);
+  border:        1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding:       1rem 1.1rem;
+  cursor:        pointer;
+  transition:    border-color .15s, box-shadow .15s;
+  text-align:    left;
+}
+.scenario-card:hover {
+  border-color: var(--sky-mid);
+  box-shadow:   0 2px 10px rgba(26,58,92,0.08);
+}
+.scenario-card.active {
+  border-color: var(--sky);
+  background:   var(--sky-pale);
+  box-shadow:   0 2px 12px rgba(26,58,92,0.12);
+}
+
+/* Card heading */
+.sc-title {
+  font-size:     13px;
+  font-weight:   600;
+  color:         var(--text);
+  line-height:   1.3;
+  margin-bottom: .25rem;
+}
+
+/* Card body text */
+.sc-desc {
+  font-size:   11.5px;
+  color:       var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TOGGLE GROUP
+   Segmented button control — one button is always .active.
+   Usage: <div class="toggle-group" id="…"><button data-v="…">…</button>…</div>
+   JS handles clicks via bindToggle() in scenarios/index.js.
+══════════════════════════════════════════════════════════════════════════ */
+.toggle-group {
+  display:       flex;
+  border-radius: var(--radius);
+  border:        1px solid var(--border);
+  overflow:      hidden;
+  margin-bottom: .25rem;
+}
+
+.toggle-group button {
+  flex:        1;
+  padding:     8px 6px;
+  font-size:   12.5px;
+  font-family: var(--font);
+  border:      none;
+  border-left: 1px solid var(--border);
+  background:  var(--white);
+  color:       var(--text-mid);
+  cursor:      pointer;
+  transition:  background .15s, color .15s;
+  line-height: 1.3;
+}
+.toggle-group button:first-child {
+  border-left: none;
+}
+.toggle-group button:hover {
+  background: var(--sky-pale);
+}
+.toggle-group button.active {
+  background:  var(--sky);
+  color:       white;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROL ROW
+   A labelled range slider with a formatted value on the right.
+   Usage: <div class="control-row"><label>…</label><input type="range">…</div>
+══════════════════════════════════════════════════════════════════════════ */
+.control-row {
+  display:       flex;
+  align-items:   center;
+  gap:           14px;
+  margin-bottom: .85rem;
+}
+
+.control-row label {
+  font-size:   13px;
+  color:       var(--text-mid);
+  width:       200px;
+  flex-shrink: 0;
+}
+
+/* Custom range slider track */
+.control-row input[type=range] {
+  flex:       1;
+  height:     4px;
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  outline:    none;
+  cursor:     pointer;
+}
+
+/* Custom range slider thumb — WebKit */
+.control-row input[type=range]::-webkit-slider-thumb {
+  appearance:  none;
+  width:       18px;
+  height:      18px;
+  border-radius: 50%;
+  background:  var(--sky);
+  border:      2px solid white;
+  box-shadow:  0 1px 4px rgba(0,0,0,.2);
+}
+
+/* Custom range slider thumb — Firefox */
+.control-row input[type=range]::-moz-range-thumb {
+  width:       18px;
+  height:      18px;
+  border-radius: 50%;
+  background:  var(--sky);
+  border:      2px solid white;
+  box-shadow:  0 1px 4px rgba(0,0,0,.2);
+}
+
+/* Formatted value display (e.g. "20 h", "10 /100h") */
+.control-val {
+  font-size:   13px;
+  font-family: var(--mono);
+  font-weight: 500;
+  color:       var(--text);
+  min-width:   80px;
+  text-align:  right;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHECKBOX ROW
+   A full-width labelled checkbox.
+   Usage: <label class="check-row"><input type="checkbox">…</label>
+══════════════════════════════════════════════════════════════════════════ */
+.check-row {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  margin-bottom:.7rem;
+  font-size:   13px;
+  color:       var(--text-mid);
+  cursor:      pointer;
+  user-select: none;
+}
+.check-row input[type=checkbox] {
+  width:        16px;
+  height:       16px;
+  accent-color: var(--sky);
+  cursor:       pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESULTS SECTION
+   Wraps the dynamically-generated result HTML injected by each scenario.
+══════════════════════════════════════════════════════════════════════════ */
+.results-section {
+  margin-top: 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   METRIC CARDS
+   2-column grid of KPI cards, each showing a big number + label.
+   Variants: .accent, .green, .sky change the border/background accent colour.
+══════════════════════════════════════════════════════════════════════════ */
+.metrics {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   12px;
+  margin-bottom:         1.25rem;
+}
+
+.metric-card {
+  background:    var(--white);
+  border:        1px solid var(--border);
+  border-radius: var(--radius);
+  padding:       1rem 1.1rem;
+}
+.metric-card.accent {
+  border-color: var(--accent);
+  background:   var(--accent-light);
+}
+.metric-card.green {
+  border-color: var(--green);
+  background:   var(--green-light);
+}
+.metric-card.sky {
+  border-color: var(--sky-mid);
+  background:   var(--sky-light);
+}
+
+.metric-label {
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  margin-bottom:  4px;
+}
+
+.metric-value {
+  font-size:      1.6rem;
+  font-weight:    300;
+  color:          var(--text);
+  letter-spacing: -.02em;
+  font-family:    var(--mono);
+}
+.metric-card.accent .metric-value { color: var(--accent); }
+.metric-card.green  .metric-value { color: var(--green);  }
+.metric-card.sky    .metric-value { color: var(--sky-mid);}
+
+.metric-sub {
+  font-size:  11.5px;
+  color:      var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BREAKDOWN TABLE
+   Itemised cost table used inside each scenario detail panel.
+   Special row variants: .section-head, .total, .saving
+══════════════════════════════════════════════════════════════════════════ */
+.breakdown {
+  width:           100%;
+  font-size:       13px;
+  border-collapse: collapse;
+  margin-bottom:   1.25rem;
+}
+.breakdown td {
+  padding:     5px 0;
+  color:       var(--text-mid);
+  border-bottom: 1px solid var(--surface);
+}
+.breakdown td:last-child {
+  text-align:  right;
+  color:       var(--text);
+  font-family: var(--mono);
+  font-size:   12.5px;
+}
+
+/* Sub-heading inside the table (e.g. "Heures de vol — planeur") */
+.breakdown tr.section-head td {
+  padding-top:    12px;
+  font-size:      10.5px;
+  font-weight:    600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  border-bottom:  none;
+}
+
+/* Grand total row */
+.breakdown tr.total td {
+  border-top:    2px solid var(--border);
+  border-bottom: none;
+  padding-top:   10px;
+  color:         var(--text);
+  font-weight:   600;
+}
+.breakdown tr.total td:last-child {
+  color:     var(--sky);
+  font-size: 14px;
+}
+
+/* Savings row (shown in green) */
+.breakdown tr.saving td        { color: var(--green); }
+.breakdown tr.saving td:last-child { color: var(--green); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COMPARISON TABLE
+   Card wrapping a <table> comparing several options side-by-side.
+   The best row receives the class .best.
+══════════════════════════════════════════════════════════════════════════ */
+.compare-wrap {
+  background:    var(--white);
+  border:        1px solid var(--border);
+  border-radius: var(--radius);
+  overflow:      hidden;
+  margin-bottom: 1.25rem;
+}
+.compare-wrap table {
+  width:           100%;
+  border-collapse: collapse;
+  font-size:       12.5px;
+}
+.compare-wrap th {
+  background:     var(--sky-pale);
+  color:          var(--text-mid);
+  font-size:      10.5px;
+  font-weight:    600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding:        8px 12px;
+  text-align:     left;
+  border-bottom:  1px solid var(--border);
+}
+.compare-wrap th:last-child { text-align: right; }
+.compare-wrap td {
+  padding:         9px 12px;
+  border-bottom:   1px solid var(--surface);
+  color:           var(--text-mid);
+  vertical-align:  middle;
+}
+.compare-wrap td:last-child {
+  text-align:  right;
+  font-family: var(--mono);
+  color:       var(--text);
+}
+.compare-wrap tr.best td { background: var(--green-light); color: var(--text); }
+.compare-wrap tr.best td:first-child { font-weight: 600; color: var(--green); }
+.compare-wrap tr:last-child td { border-bottom: none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BADGES
+   Small inline pill labels used inside table cells.
+   .badge-best — green "Meilleur" label
+   .badge-savings — amber "+X €" label
+══════════════════════════════════════════════════════════════════════════ */
+.badge {
+  display:        inline-block;
+  font-size:      10px;
+  font-weight:    600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding:        2px 7px;
+  border-radius:  20px;
+  margin-left:    6px;
+}
+.badge-best {
+  background: var(--green);
+  color:      white;
+}
+.badge-savings {
+  background: var(--amber-light);
+  color:      var(--amber);
+  border:     1px solid #e8c66a;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INFO BOX
+   Coloured callout box for tips, warnings and highlights.
+   Variants: default (sky/blue), .amber-box, .green-box
+══════════════════════════════════════════════════════════════════════════ */
+.info-box {
+  background:    var(--sky-pale);
+  border:        1px solid var(--sky-light);
+  border-radius: var(--radius);
+  padding:       .85rem 1rem;
+  font-size:     12.5px;
+  color:         var(--text-mid);
+  margin-bottom: 1rem;
+  line-height:   1.55;
+}
+.info-box strong { color: var(--sky-mid); }
+.info-box.amber-box {
+  background:   var(--amber-light);
+  border-color: #f0d98a;
+}
+.info-box.green-box {
+  background:   var(--green-light);
+  border-color: #a8d9c0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FOLDABLE DETAIL PANELS (accordion)
+   Native <details> / <summary> with custom chevron animation.
+   The .fold-total span inside <summary> shows the cost before expanding.
+══════════════════════════════════════════════════════════════════════════ */
+details.fold {
+  border:        1px solid var(--border);
+  border-radius: var(--radius);
+  background:    var(--white);
+  margin-bottom: .65rem;
+  overflow:      hidden;
+}
+
+details.fold summary {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  padding:         .75rem 1rem;
+  cursor:          pointer;
+  list-style:      none;       /* hide default marker in Firefox */
+  font-size:       13px;
+  font-weight:     500;
+  color:           var(--text);
+  user-select:     none;
+}
+/* Hide the default WebKit disclosure triangle */
+details.fold summary::-webkit-details-marker { display: none; }
+
+/* Custom animated chevron via ::after */
+details.fold summary::after {
+  content:     '▾';
+  font-size:   13px;
+  color:       var(--text-muted);
+  transition:  transform .2s;
+  flex-shrink: 0;
+  margin-left: .75rem;
+}
+details.fold[open] summary::after {
+  transform: rotate(-180deg);
+}
+
+/* Running total shown on the right inside the summary bar */
+details.fold summary .fold-total {
+  font-family:  var(--mono);
+  font-size:    13px;
+  font-weight:  500;
+  color:        var(--sky);
+  margin-left:  auto;
+  margin-right: .5rem;
+}
+
+/* Content area inside the open panel */
+details.fold .fold-body { padding: 0 1rem .9rem; }
+details.fold .fold-body .breakdown td:first-child { padding-left: 2px; }
+details.fold .fold-body .breakdown tr.total td    { padding-top: 8px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 560px) {
+  .scenario-grid {
+    grid-template-columns: 1fr;
+  }
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  .control-row label {
+    width:     150px;
+    font-size: 12px;
+  }
+}

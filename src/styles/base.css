@@ -1,0 +1,34 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   base.css — Reset and root element styles
+   Depends on: variables.css
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Box model reset ─────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font);
+  background:  var(--surface);
+  color:       var(--text);
+  min-height:  100vh;
+  line-height: 1.6;
+}
+
+/* ── Utility ─────────────────────────────────────────────────────────────── */
+
+/* .hidden hides an element — JS toggles this class to show/hide scenarios */
+.hidden {
+  display: none !important;
+}
+
+/* Horizontal rule used as a visual separator between the selector and results */
+hr.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}

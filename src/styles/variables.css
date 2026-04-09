@@ -1,0 +1,44 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   variables.css — Design tokens (CSS custom properties)
+   All colours, radii and font stacks live here.
+   To change the look of the whole app, edit this file only.
+───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Colour palette ───────────────────────────────────────────────────── */
+
+  /* Brand blue (sky) — used for primary actions, headers, active states */
+  --sky:       #1a3a5c;
+  --sky-mid:   #2b5480;
+  --sky-light: #d6e8f7;
+  --sky-pale:  #eef5fb;
+
+  /* Accent orange — used for warnings and the "discovery" scenario highlight */
+  --accent:       #e05a2b;
+  --accent-light: #fdf0eb;
+
+  /* Green — used for savings, positive outcomes, "best" badges */
+  --green:       #2e8c60;
+  --green-light: #d4eede;
+
+  /* Amber — used for informational callouts, mild warnings */
+  --amber:       #c97b0a;
+  --amber-light: #fef3dc;
+
+  /* ── Neutral text ─────────────────────────────────────────────────────── */
+  --text:       #1a2733;   /* headings, primary body copy */
+  --text-mid:   #4a6175;   /* secondary labels, table text */
+  --text-muted: #7a96a8;   /* hints, sub-labels */
+
+  /* ── Surfaces & borders ───────────────────────────────────────────────── */
+  --border:  #d0dde8;
+  --surface: #f5f9fc;  /* page background */
+  --white:   #ffffff;
+
+  /* ── Shape ────────────────────────────────────────────────────────────── */
+  --radius: 10px;
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;  /* used for all monetary values */
+}

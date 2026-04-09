@@ -1,0 +1,104 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   layout.css — Page-level layout: header, main container, footer
+   Depends on: variables.css
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+header {
+  background:  var(--sky);
+  color:       white;
+  padding:     2.5rem 2rem 2rem;
+  position:    relative;
+  overflow:    hidden;
+}
+
+/* Decorative background circles (pure CSS, no images needed) */
+header::before {
+  content:       '';
+  position:      absolute;
+  top:           -60px;
+  right:         -80px;
+  width:         320px;
+  height:        320px;
+  border-radius: 50%;
+  background:    rgba(255,255,255,0.04);
+}
+header::after {
+  content:       '';
+  position:      absolute;
+  bottom:        -40px;
+  left:          30%;
+  width:         200px;
+  height:        200px;
+  border-radius: 50%;
+  background:    rgba(255,255,255,0.03);
+}
+
+/* Inner wrapper constrains the header content width */
+.header-inner {
+  max-width: 860px;
+  margin:    0 auto;
+  position:  relative;
+  z-index:   1;   /* sits above the ::before / ::after circles */
+}
+
+/* Small uppercase club name above the main heading */
+.header-club {
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.55);
+  margin-bottom:  .5rem;
+}
+
+header h1 {
+  font-size:      clamp(1.4rem, 4vw, 2rem);
+  font-weight:    300;
+  color:          white;
+  letter-spacing: -.02em;
+  line-height:    1.2;
+}
+
+/* The bold word "participation aux frais" inside the h1 */
+header h1 span {
+  font-weight: 500;
+}
+
+.header-sub {
+  font-size: 13px;
+  color:     rgba(255,255,255,0.55);
+  margin-top:.6rem;
+}
+
+/* ── Main content area ───────────────────────────────────────────────────── */
+main {
+  max-width: 860px;
+  margin:    0 auto;
+  padding:   2rem 1.25rem 4rem;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+footer {
+  text-align:  center;
+  font-size:   11.5px;
+  color:       var(--text-muted);
+  padding:     1.5rem 1rem 2rem;
+  border-top:  1px solid var(--border);
+  max-width:   860px;
+  margin:      0 auto;
+}
+footer a {
+  color:           var(--sky-mid);
+  text-decoration: none;
+}
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive overrides ────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  header {
+    padding: 1.75rem 1.25rem 1.5rem;
+  }
+}
