@@ -53,6 +53,12 @@ const SCENARIO_COMPONENTS = {
   visit:     VisitScenario,
 };
 
+// ── Feature flags — driven by VITE_SHOW_<ID> env vars ────────────────────────
+// Absent or any value other than 'true' = hidden; 'true' = visible.
+const VISIBLE_SCENARIOS = SCENARIOS.filter(
+  (sc) => import.meta.env[`VITE_ENABLE_SCENARIO_${sc.id.toUpperCase()}`] === 'true',
+);
+
 // ── Unload guard (prevent accidental back-navigation once user starts) ────────
 let unloadGuardActive = false;
 function activateUnloadGuard() {
@@ -97,9 +103,13 @@ export default function App() {
 
       {/* ── MAIN CONTENT ──────────────────────────────────────────────────── */}
       <main>
-        <p className="section-label">Choisissez votre objectif</p>
+        <p className="section-label">
+          {VISIBLE_SCENARIOS.length === 0
+            ? 'Aucun scénario disponible, revenez plus tard.'
+            : 'Choisissez votre objectif'}
+        </p>
         <div className="scenario-grid">
-          {SCENARIOS.map((sc) => (
+          {VISIBLE_SCENARIOS.map((sc) => (
             <button
               key={sc.id}
               className={`scenario-card${activeScenario === sc.id ? ' active' : ''}`}

@@ -29,6 +29,11 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       - run: yarn build
+        env:
+          VITE_ENABLE_SCENARIO_LEARN: 'true'
+          VITE_ENABLE_SCENARIO_SEASON: 'true'
+          VITE_ENABLE_SCENARIO_DISCOVERY: 'false'
+          VITE_ENABLE_SCENARIO_VISIT: 'false'
 
       - uses: actions/upload-pages-artifact@v4
         with:

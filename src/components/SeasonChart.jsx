@@ -191,10 +191,12 @@ export default function SeasonChart({
 
     const chartData = { labels: xLabels, datasets };
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 560;
+
     const options = {
       responsive:          true,
       maintainAspectRatio: true,
-      aspectRatio:         2.4,
+      aspectRatio:         isMobile ? 1.2 : 2.4,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: {
@@ -278,10 +280,7 @@ export default function SeasonChart({
       background: 'var(--white)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius)', padding: '1rem 1rem .75rem',
     }}>
-      <p style={{
-        fontSize: '11px', fontWeight: 600, letterSpacing: '.08em',
-        textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '.75rem',
-      }}>
+      <p className="chart-title">
         Évolution du coût en fonction du nombre d'heures de vol dans la saison
       </p>
       <canvas ref={canvasRef} />
