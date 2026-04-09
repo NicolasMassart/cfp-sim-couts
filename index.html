@@ -82,10 +82,12 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0
 .metric-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
 .metric-card.accent { border-color: var(--accent); background: var(--accent-light); }
 .metric-card.green { border-color: var(--green); background: var(--green-light); }
+.metric-card.sky { border-color: var(--sky-mid); background: var(--sky-light); }
 .metric-label { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
 .metric-value { font-size: 1.6rem; font-weight: 300; color: var(--text); letter-spacing: -.02em; font-family: var(--mono); }
 .metric-card.accent .metric-value { color: var(--accent); }
 .metric-card.green .metric-value { color: var(--green); }
+.metric-card.sky .metric-value { color: var(--sky-mid); }
 .metric-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
 
 /* Breakdown table */
@@ -259,9 +261,9 @@ details.fold .fold-body .breakdown tr.total td { padding-top: 8px; }
     <span class="control-val" id="seasonInstrVal">30 min</span>
   </div>
   <div class="control-row">
-    <label>dont en saison estivale (avr.–sept.) <span style="font-size:11px;color:var(--text-muted)">(supplément instruction)</span></label>
-    <input type="range" id="seasonSummerHours" min="0" max="20" step="0.5" value="0" oninput="updateSeason()">
-    <span class="control-val" id="seasonSummerHoursVal">0 h</span>
+    <label>dont en saison hivernale (oct.–mars) <span style="font-size:11px;color:var(--text-muted)">(supplément instruction gratuit)</span></label>
+    <input type="range" id="seasonWinterHours" min="0" max="20" step="0.5" value="0" oninput="updateSeason()">
+    <span class="control-val" id="seasonWinterHoursVal">0 h</span>
   </div>
 
   <div id="seasonChartWrap" style="display:none;margin-top:1.25rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1rem .75rem;">
@@ -607,12 +609,7 @@ function updateLearn() {
   let html = '';
 
   // ── Totaux en premier ─────────────────────────────────────────────────────
-  html += `<div class="metrics" style="margin-top:1.25rem;grid-template-columns:1fr 1fr 1fr;">
-    <div class="metric-card accent">
-      <p class="metric-label">Total formation (2 saisons)</p>
-      <p class="metric-value">${fmt(grandTotal)}</p>
-      <p class="metric-sub">${fmt(grandTotal / totalHours)} par heure · ${fmtH(totalHours)} h au total</p>
-    </div>
+  html += `<div class="metrics" style="margin-top:1.25rem;">
     <div class="metric-card">
       <p class="metric-label">Saison 1</p>
       <p class="metric-value">${fmt(total1)}</p>
@@ -688,7 +685,7 @@ function updateLearn() {
   }).join('');
 
   html += `<div class="metrics">
-    <div class="metric-card accent">
+    <div class="metric-card sky">
       <p class="metric-label">Total formation (2 saisons)</p>
       <p class="metric-value">${fmt(grandTotal)}</p>
       <p class="metric-sub">Hors bourses</p>
@@ -785,7 +782,13 @@ function updateSeasonChart(p, plane, age, hours, dur, instrHours, instrHoursSumm
   if (!ctx) return;
   wrap.style.display = '';
 
-  const xLabels = [], fixedArr = [], forfaitArr = [], extraArr = [], towArr = [], instrArr = [], sf28Arr = [], lineArr = [];
+  const xLabels = [],
+        membershipArr = [],             // Cotisation (gris clair)
+        licenseArr = [],                // Licence FFVP (gris moyen)
+        f15Arr = [],                    // Forfait 15h
+        forfait30Arr = [],              // Tous les forfaits 30h (même couleur)
+        fExtArr = [],                   // Prolongation(s) 10h
+        extraArr = [], towArr = [], instrArr = [], sf28Arr = [], lineArr = [];
 
   // Precompute the forfait chosen for the TOTAL planned hours — paid upfront, flat on the chart
   const billableRatio = Math.min(1, p.freeThreshold / Math.max(dur, 0.01));
@@ -844,16 +847,41 @@ function updateSeasonChart(p, plane, age, hours, dur, instrHours, instrHoursSumm
 
     const bx = instrHours * frac + soloHours * frac * billableRatio;
 
-    const forfait_x = forfaitAtBx(bx);
-    const extra_x   = extraAtBx(bx);
-    const instr_x   = instrHoursSummer * frac * p.instrRate;
-    const sf28_x    = sf28CostTotal * frac;
-    const tow_x     = towTotal * frac;
+    // Split forfait cost into per-tier increments for distinct colors
+    let f15 = 0, f30_1 = 0, f30_2 = 0, f30_3 = 0, f30_4p = 0, fExt = 0;
+    if (bestFinal.id === 'pkg15')  f15 = p.pkg.h15;
+    else if (bestFinal.id === 'pkg15w') f15 = p.pkg.w15nonSPL;
+    else if (bestFinal.n30 !== undefined) {
+      const { n30, k } = bestFinal;
+      let cov = 0;
+      for (let i = 1; i <= n30; i++) {
+        if (bx >= cov) {
+          const mc = pkg30IncChart(i);
+          if      (i === 1) f30_1 = mc;
+          else if (i === 2) f30_2 = mc;
+          else if (i === 3) f30_3 = mc;
+          else              f30_4p += mc;
+        }
+        cov += cov30;
+      }
+      for (let j = 1; j <= k; j++) {
+        if (bx >= cov) fExt += p.pkg.ext10;
+        cov += 10 / coeff;
+      }
+    }
 
-    const total_x = fixed + forfait_x + extra_x + instr_x + sf28_x + tow_x;
+    const extra_x = extraAtBx(bx);
+    const instr_x = instrHoursSummer * frac * p.instrRate;
+    const sf28_x  = sf28CostTotal * frac;
+    const tow_x   = towTotal * frac;
 
-    fixedArr.push(fixed);
-    forfaitArr.push(forfait_x);
+    const total_x = p.membership.annual + p.license.annual + f15 + f30_1 + f30_2 + f30_3 + f30_4p + fExt + extra_x + instr_x + sf28_x + tow_x;
+
+    membershipArr.push(p.membership.annual);
+    licenseArr.push(p.license.annual);
+    f15Arr.push(f15);
+    forfait30Arr.push(f30_1 + f30_2 + f30_3 + f30_4p);
+    fExtArr.push(fExt);
     extraArr.push(extra_x);
     towArr.push(tow_x);
     instrArr.push(instr_x);
@@ -865,20 +893,32 @@ function updateSeasonChart(p, plane, age, hours, dur, instrHours, instrHoursSumm
     type: 'bar', label, data, backgroundColor: color, stack: 'cost', yAxisID: 'y', borderWidth: 0, order: 2
   });
 
+  // Build datasets — only include forfait tiers that are actually used
   const datasets = [
-    bar('Cotisation & licence', fixedArr, '#94a3b8'),
-    bar('Forfait', forfaitArr, '#3b82f6'),
-    bar('Heures hors forfait', extraArr, '#93c5fd'),
-    bar('Remorquage', towArr, '#8b5cf6'),
-    bar('Instruction (été)', instrArr, '#f59e0b'),
-    bar('Moto-planeur SF 28', sf28Arr, '#10b981'),
+    bar('Cotisation',     membershipArr, '#9ca3af'),   // gray-400
+    bar('Licence FFVP',   licenseArr,    '#6b7280'),   // gray-500
+  ];
+
+  // Forfaits — rouge pour tous les 30h, orange pour les prolongations 10h
+  if (bestFinal.id === 'pkg15' || bestFinal.id === 'pkg15w')
+    datasets.push(bar('Forfait 15h',         f15Arr,       '#fde047')); // yellow-300
+  if (bestFinal.n30 >= 1)
+    datasets.push(bar('Forfait(s) 30h',      forfait30Arr, '#eab308')); // yellow-500
+  if (bestFinal.k >= 1)
+    datasets.push(bar('Prolongation(s) 10h', fExtArr,      '#ca8a04')); // yellow-600
+
+  datasets.push(
+    bar('Heures hors forfait', extraArr, '#ef4444'),   // red-500 — coûteux, à éviter
+    bar('Remorquage',          towArr,   '#8b5cf6'),   // violet-500
+    bar('Instruction (été)',   instrArr, '#3b82f6'),   // blue-500
+    bar('Moto-planeur SF 28',  sf28Arr,  '#10b981'),   // emerald-500
     {
       type: 'line', label: 'Coût moyen / heure',
       data: lineArr, yAxisID: 'y1',
       borderColor: '#ef4444', borderDash: [5, 3], borderWidth: 2,
       pointRadius: 0, tension: 0.3, fill: false, order: 0
     }
-  ];
+  );
 
   const chartData = { labels: xLabels, datasets };
   const options = {
@@ -957,13 +997,13 @@ function updateSeason() {
   instrEl.value = instrHours;
   document.getElementById('seasonInstrVal').textContent = fmtSliderH(instrHours);
 
-  // Slider "dont en saison estivale" : même range que le slider instructeur (max = hours), valeur plafonnée à instrHours
-  const summerEl = document.getElementById('seasonSummerHours');
-  summerEl.max = hours;
-  const instrHoursSummer = Math.min(Math.max(0, +summerEl.value), instrHours);
-  summerEl.value = instrHoursSummer;
-  const instrHoursWinter = instrHours - instrHoursSummer;
-  document.getElementById('seasonSummerHoursVal').textContent = fmtSliderH(instrHoursSummer);
+  // Slider "dont en saison hivernale" : même range que le slider instructeur (max = hours), valeur plafonnée à instrHours
+  const winterEl = document.getElementById('seasonWinterHours');
+  winterEl.max = hours;
+  const instrHoursWinter = Math.min(Math.max(0, +winterEl.value), instrHours);
+  winterEl.value = instrHoursWinter;
+  const instrHoursSummer = instrHours - instrHoursWinter;
+  document.getElementById('seasonWinterHoursVal').textContent = fmtSliderH(instrHoursWinter);
 
   // Slider moto-planeur
   const sf28Hours = +document.getElementById('seasonSf28').value;
@@ -999,11 +1039,11 @@ function updateSeason() {
   }
 
   if (instrSaving > 0) {
-    html += `<div class="info-box green-box"><strong>Avantage hiver :</strong> ${fmtH(instrHoursWinter)} avec instructeur hors saison estivale → pas de supplément instruction. Économie : <strong>${fmt(instrSaving)}</strong>.</div>`;
+    html += `<div class="info-box green-box">Économie de <strong>${fmt(instrSaving)}</strong> : ${fmtH(instrHoursWinter)} d'instruction en hiver → pas de supplément instruction.</div>`;
   }
 
   html += `<div class="metrics">
-    <div class="metric-card accent">
+    <div class="metric-card sky">
       <p class="metric-label">Meilleur coût total</p>
       <p class="metric-value">${fmt(totalBest)}</p>
       <p class="metric-sub">${best.label}</p>
@@ -1022,6 +1062,14 @@ function updateSeason() {
     ? `<tr><td>Moto-planeur SF 28 (${fmtH(sf28Hours)} × 60 €/h)</td><td>${fmt(sf28Cost)}</td></tr>`
     : '';
 
+  // Heures restantes sur le forfait (si non totalement consommé)
+  if (best.coverage && best.coverage > billable) {
+    const remaining = best.coverage - billable;
+    html += `<div class="info-box amber-box" style="margin-top:.75rem;">
+      Il vous resterait <strong>${fmtH(remaining)}</strong> non utilisées sur votre ${best.label.toLowerCase()} — valables 1 an à compter de la souscription.
+    </div>`;
+  }
+
   // Détail des coûts — panneau replié
   html += `<details class="fold" style="margin-top:1rem;">
     <summary>Détail des coûts <span class="fold-total">${fmt(totalBest)}</span></summary>
@@ -1038,30 +1086,22 @@ function updateSeason() {
     </div>
   </details>`;
 
-  // Comparaison des forfaits — panneau replié
-  html += `<details class="fold">
-    <summary>Comparaison de tous les forfaits</summary>
-    <div class="fold-body">`;
-  html += buildCompareTable(opts, fixed + instr + tow + sf28Cost);
-
   const be15h = p.pkg.h15 / p.rates[plane];
   const be30h = p.pkg.h30 / p.rates[plane];
 
   if (billable < be15h) {
-    html += `<div class="info-box amber-box" style="margin-top:.75rem;">Pour ${fmtH(billable)} facturables, le paiement à l'heure est en réalité moins cher que le forfait 15h (seuil de rentabilité : ${fmtH(be15h)}). Un forfait n'est rentable qu'à partir d'un certain volume de vol.</div>`;
+    html += `<div class="info-box amber-box" style="margin-top:.75rem;">Pour ${fmtH(billable)} facturables, le paiement à l'heure est moins cher que le forfait 15h (seuil de rentabilité : ${fmtH(be15h)}).</div>`;
   } else if (best.id === 'pkg15' || best.id === 'pkg15w') {
-    html += `<div class="info-box green-box" style="margin-top:.75rem;">Le forfait 15h est votre meilleure option. Le seuil de rentabilité avec le paiement à l'heure est à ${fmtH(be15h)}, et le forfait 30h n'est intéressant qu'à partir de ${fmtH(be30h)} heures facturables.</div>`;
+    html += `<div class="info-box green-box" style="margin-top:.75rem;">Le forfait 15h est votre meilleure option. Le forfait 30h ne devient intéressant qu'à partir de ${fmtH(be30h)} heures facturables.</div>`;
   } else if (best.id && best.id.startsWith('pkg30')) {
-    html += `<div class="info-box green-box" style="margin-top:.75rem;">Pour ${fmtH(billable)}, le forfait 30h est votre meilleure option (seuil de rentabilité vs paiement à l'heure à ${fmtH(be30h)}).</div>`;
+    html += `<div class="info-box green-box" style="margin-top:.75rem;">Pour ${fmtH(billable)}, le forfait 30h est votre meilleure option (rentable dès ${fmtH(be30h)} heures facturables).</div>`;
   }
 
   if (best.n30 >= 3) {
     html += `<div class="info-box amber-box" style="margin-top:.5rem;"><strong>Réduction multi-forfaits incluse :</strong> le simulateur applique <strong>${best.n30 === 3 ? '−50 %' : '−70 %'}</strong> sur le ${best.n30 === 3 ? '3e' : best.n30 + 'e'} forfait 30h. Contactez le club pour en bénéficier — ce n'est pas automatique.</div>`;
   } else if (billable > 30 / COEFF[plane]) {
-    html += `<div class="info-box amber-box" style="margin-top:.5rem;"><strong>Réduction disponible :</strong> à partir du 3e forfait 30h dans la même année civile, vous bénéficiez de <strong>−50 %</strong> (4e et suivants : −70 %). Le simulateur en tient compte automatiquement si nécessaire.</div>`;
+    html += `<div class="info-box amber-box" style="margin-top:.5rem;"><strong>Réduction disponible :</strong> à partir du 3e forfait 30h dans la même année civile : <strong>−50 %</strong> (4e et suivants : −70 %). Le simulateur en tient compte automatiquement.</div>`;
   }
-
-  html += `</div></details>`;
   html += footNotes();
   document.getElementById('seasonResults').innerHTML = html;
 
