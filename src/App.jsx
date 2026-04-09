@@ -98,6 +98,13 @@ export default function App() {
           </svg>
           <h1>Simulateur de <span>participation aux frais</span></h1>
           <p className="header-sub">Estimez votre budget de saison selon votre profil et vos habitudes de vol.</p>
+          <p className="header-disclaimer">
+            Attention — Ce simulateur est une aide à la lecture des tarifs, pas un document contractuel.
+            Les coûts réels sont publiés sur{' '}
+            <a href="https://www.caenfalaiseplaneurs.fr/costs" target="_blank" rel="noreferrer">
+              caenfalaiseplaneurs.fr/costs
+            </a>.
+          </p>
         </div>
       </header>
 
@@ -123,7 +130,7 @@ export default function App() {
         <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '.5rem' }}>
           Votre objectif n'est pas dans la liste ?{' '}
           <a
-            href="https://www.caenfalaiseplaneurs.fr/fr/contact"
+            href="https://www.caenfalaiseplaneurs.fr/contact"
             target="_blank"
             rel="noreferrer"
             style={{ color: 'var(--sky-mid)', textDecoration: 'none', fontWeight: 500 }}
@@ -139,11 +146,15 @@ export default function App() {
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <footer>
         Tarifs issus de{' '}
-        <a href="https://www.caenfalaiseplaneurs.fr/couts" target="_blank" rel="noreferrer">
-          caenfalaiseplaneurs.fr
+        <a href="https://www.caenfalaiseplaneurs.fr/costs" target="_blank" rel="noreferrer">
+          caenfalaiseplaneurs.fr/costs
         </a>
-        {' '}— susceptibles d'être modifiés. Remorquage à 2,80 €/100h.
-        Ce simulateur est indicatif ; consultez le club pour votre situation.
+        {' '}— susceptibles d'être modifiés.
+        Ce simulateur est indicatif ;{' '}
+        <a href="https://www.caenfalaiseplaneurs.fr/contact" target="_blank" rel="noreferrer">
+          consultez le club
+        </a>
+        {' '}pour votre situation.
       </footer>
     </>
   );

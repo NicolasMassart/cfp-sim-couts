@@ -1,3 +1,4 @@
 node_modules
 *.local
 vite.config.js.timestamp-*.mjs
+dist/
