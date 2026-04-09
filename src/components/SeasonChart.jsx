@@ -182,6 +182,7 @@ export default function SeasonChart({
         borderDash:  [5, 3],
         borderWidth: 2,
         pointRadius: 0,
+        pointStyle:  'line',
         tension:     0.3,
         fill:        false,
         order:       0,
@@ -198,7 +199,20 @@ export default function SeasonChart({
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { font: { size: 11 }, padding: 10, boxWidth: 12 },
+          labels: {
+            font: { size: 11 }, padding: 10, boxWidth: 12, usePointStyle: true,
+            filter: (item, chart) => {
+              const data = chart.datasets[item.datasetIndex]?.data ?? [];
+              return data.some((v) => v > 0);
+            },
+            generateLabels: (chart) => {
+              const defaults = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+              return defaults.map((item) => {
+                if (item.text === 'Coût moyen / heure') item.lineDash = [5, 3];
+                return item;
+              });
+            },
+          },
         },
         tooltip: {
           callbacks: {
@@ -225,13 +239,13 @@ export default function SeasonChart({
         y: {
           stacked:  true,
           position: 'left',
-          title:    { display: true, text: 'Coût cumulé (€)', font: { size: 10 } },
+          title:    { display: true, text: 'Coût cumulé de l\'activité (€)', font: { size: 10 } },
           ticks:    { font: { size: 10 }, callback: (v) => v + ' €' },
           grid:     { color: '#f1f5f9' },
         },
         y1: {
           position: 'right',
-          title:    { display: true, text: '€ / heure', font: { size: 10 } },
+          title:    { display: true, text: 'Coût moyen par heure de vol (€/h)', font: { size: 10 } },
           ticks:    { font: { size: 10 }, callback: (v) => v.toFixed(0) + ' €' },
           grid:     { drawOnChartArea: false },
         },
@@ -268,7 +282,7 @@ export default function SeasonChart({
         fontSize: '11px', fontWeight: 600, letterSpacing: '.08em',
         textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '.75rem',
       }}>
-        Évolution du coût en fonction des heures volées
+        Évolution du coût en fonction du nombre d'heures de vol dans la saison
       </p>
       <canvas ref={canvasRef} />
     </div>

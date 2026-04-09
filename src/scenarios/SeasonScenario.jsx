@@ -56,6 +56,11 @@ export default function SeasonScenario() {
   const best     = opts[0];
   const totalBest = fixed + best.cost + instr + tow + sf28Cost;
 
+  // Extra hours beyond package coverage (shown as a separate breakdown row)
+  const extraFlightCost  = best.pkgCost != null ? best.cost - best.pkgCost : 0;
+  const extraFlightHours = best.coverage != null && billable > best.coverage
+    ? billable - best.coverage : 0;
+
   // ── Break-even thresholds ─────────────────────────────────────────────────
   const be15h = p.pkg.h15 / p.rates[plane];
   const be30h = p.pkg.h30 / p.rates[plane];
@@ -113,14 +118,19 @@ export default function SeasonScenario() {
       <div className="control-row">
         <label>Heures avec instructeur <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(min. 1 vol obligatoire)</span></label>
         <input type="range" min={0} max={hours} step={0.5} value={instrHours}
-          onChange={(e) => setInstrHoursRaw(+e.target.value)} />
+          onChange={(e) => {
+            const val = +e.target.value;
+            const newInstrHours = Math.min(Math.max(0.5, val), hours);
+            setInstrHoursRaw(val);
+            if (instrHoursWinterRaw > newInstrHours) setInstrHoursWinterRaw(newInstrHours);
+          }} />
         <span className="control-val">{fmtSliderH(instrHours)}</span>
       </div>
 
       <div className="control-row">
         <label>dont en saison hivernale (oct.–mars) <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(supplément instruction gratuit)</span></label>
-        <input type="range" min={0} max={instrHours} step={0.5} value={instrHoursWinter}
-          onChange={(e) => setInstrHoursWinterRaw(+e.target.value)} />
+        <input type="range" min={0} max={hours} step={0.5} value={instrHoursWinter}
+          onChange={(e) => setInstrHoursWinterRaw(Math.min(+e.target.value, instrHours))} />
         <span className="control-val">{fmtSliderH(instrHoursWinter)}</span>
       </div>
 
@@ -141,6 +151,22 @@ export default function SeasonScenario() {
         </div>
       )}
 
+      {/* ── Cost evolution chart ───────────────────────────────────────────── */}
+      <SeasonChart
+        p={p}
+        plane={plane}
+        age={age}
+        hours={hours}
+        dur={dur}
+        instrHours={instrHours}
+        instrHoursSummer={instrHoursSummer}
+        soloHours={soloHours}
+        towPer100h={towPer100h}
+        fixed={fixed}
+        sf28CostTotal={sf28Cost}
+        towTotal={tow}
+      />
+
       <div className="metrics">
         <div className="metric-card sky">
           <p className="metric-label">Meilleur coût total</p>
@@ -156,8 +182,7 @@ export default function SeasonScenario() {
 
       {best.coverage && best.coverage > billable && (
         <div className="info-box amber-box" style={{ marginTop: '.75rem' }}>
-          Il vous resterait <strong>{fmtH(best.coverage - billable)}</strong> non utilisées sur votre{' '}
-          {best.label.toLowerCase()} — valables 1 an à compter de la souscription.
+          Il vous resterait <strong>{fmtH(best.coverage - billable)}</strong> non utilisées sur votre forfait 30h — valables 1 an à compter de la souscription.
         </div>
       )}
 
@@ -169,15 +194,54 @@ export default function SeasonScenario() {
             <tbody>
               <tr><td>Cotisation annuelle</td><td>{fmt(p.membership.annual)}</td></tr>
               <tr><td>Licence FFVP annuelle</td><td>{fmt2(p.license.annual)}</td></tr>
+              {/* 30h options: one row per individual package purchase */}
+              {best.pkg30Items ? (
+                <>
+                  {best.pkg30Items.map((item, idx) => (
+                    <tr key={idx}><td>{item.label}</td><td>{fmt(item.cost)}</td></tr>
+                  ))}
+                  {best.pkgCostExt > 0 && (
+                    <tr><td>{best.labelExt}</td><td>{fmt(best.pkgCostExt)}</td></tr>
+                  )}
+                </>
+              ) : (
+                /* 15h / pay-per-hour: single package row */
+                <tr>
+                  <td>
+                    {best.label}
+                    {best.note && <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {extraFlightCost > 0 ? best.note.replace(/, \+[^·]+à l'heure/, '') : best.note}
+                    </span>}
+                  </td>
+                  <td>{fmt(extraFlightCost > 0 ? best.pkgCost : best.cost)}</td>
+                </tr>
+              )}
+              {/* Extra hours row */}
+              {extraFlightCost > 0 && (
+                <tr>
+                  <td>
+                    Heures hors forfait
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {fmtH(extraFlightHours)} × {fmt2(p.rates[plane])}
+                    </span>
+                  </td>
+                  <td>{fmt(extraFlightCost)}</td>
+                </tr>
+              )}
               <tr>
-                <td>{best.label} <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{best.note}</span></td>
-                <td>{fmt(best.cost)}</td>
-              </tr>
-              <tr>
-                <td>Instruction <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{instrNote}</span></td>
+                <td>
+                  Instruction
+                  <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>{instrNote}</span>
+                </td>
                 <td>{fmt(instr)}</td>
               </tr>
-              <tr><td>Remorquage (~{nFlights} vols × {towPer100h}/100h)</td><td>{fmt(tow)}</td></tr>
+              <tr>
+                <td>
+                  Remorquage
+                  <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>~{nFlights} vols × {towPer100h}/100h</span>
+                </td>
+                <td>{fmt(tow)}</td>
+              </tr>
               {sf28Cost > 0 && (
                 <tr><td>Moto-planeur SF 28 ({fmtH(sf28Hours)} × 60 €/h)</td><td>{fmt(sf28Cost)}</td></tr>
               )}
@@ -208,10 +272,7 @@ export default function SeasonScenario() {
       {/* ── Multi-package discount reminder ───────────────────────────────── */}
       {best.n30 >= 3 ? (
         <div className="info-box amber-box" style={{ marginTop: '.5rem' }}>
-          <strong>Réduction multi-forfaits incluse :</strong> le simulateur applique{' '}
-          <strong>{best.n30 === 3 ? '−50 %' : '−70 %'}</strong> sur le{' '}
-          {best.n30 === 3 ? '3e' : best.n30 + 'e'} forfait 30h.
-          Contactez le club pour en bénéficier — ce n'est pas automatique.
+          <strong>Réduction multi-forfaits 30h incluse :</strong> −50 % sur le 3e puis −70 % sur le 4e et suivants.
         </div>
       ) : billable > 30 / COEFF[plane] ? (
         <div className="info-box amber-box" style={{ marginTop: '.5rem' }}>
@@ -220,22 +281,6 @@ export default function SeasonScenario() {
           automatiquement.
         </div>
       ) : null}
-
-      {/* ── Cost evolution chart ───────────────────────────────────────────── */}
-      <SeasonChart
-        p={p}
-        plane={plane}
-        age={age}
-        hours={hours}
-        dur={dur}
-        instrHours={instrHours}
-        instrHoursSummer={instrHoursSummer}
-        soloHours={soloHours}
-        towPer100h={towPer100h}
-        fixed={fixed}
-        sf28CostTotal={sf28Cost}
-        towTotal={tow}
-      />
 
       <FootNotes />
     </>

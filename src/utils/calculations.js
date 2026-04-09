@@ -183,15 +183,27 @@ export function flightOptions(billableH, plane, age, nonSPL) {
       label = n + '× forfait 30h + ' + (k === 1 ? 'prolongation 10h' : '2× prolongation 10h');
     }
 
+    const pkgCost30 = pkg30TotalCost(n);
+    const pkgCostExt = k * p.pkg.ext10;
+    const ordinal = (i) => i === 1 ? '1er' : i + 'e';
+    const pkg30Items = Array.from({ length: n }, (_, i) => {
+      const num = i + 1;
+      const disc = num === 3 ? ' (−50 %)' : num >= 4 ? ' (−70 %)' : '';
+      return { label: ordinal(num) + ' forfait 30h' + disc, cost: pkg30Inc(num) };
+    });
     opts.push({
-      id:       `pkg30_${n}_${k}`,
-      n30:      n,
+      id:         `pkg30_${n}_${k}`,
+      n30:        n,
       k,
       coverage,
       label,
-      cost:     pkgCost + extra,
+      labelExt:   k === 1 ? 'Prolongation 10h' : k > 1 ? k + '× prolongation 10h' : null,
+      cost:       pkgCost + extra,
       pkgCost,
-      note:     'Couvre ' + fmtH(coverage) + coverNote + ' · valable 1 an',
+      pkgCost30,
+      pkgCostExt,
+      pkg30Items,
+      note:       'Couvre ' + fmtH(coverage) + coverNote + ' · valable 1 an',
     });
   }
 
