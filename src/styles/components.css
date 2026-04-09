@@ -447,6 +447,9 @@ details.fold summary .fold-total {
   color:        var(--sky);
   margin-left:  auto;
   margin-right: .5rem;
+  padding-left: .75rem;
+  white-space:  nowrap;
+  flex-shrink:  0;
 }
 
 /* Content area inside the open panel */
