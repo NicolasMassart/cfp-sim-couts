@@ -27,7 +27,7 @@ const SCENARIOS = [
   {
     id:    'learn',
     title: 'Apprendre à voler (jeune / élève)',
-    desc:  'Moins de 25 ans, formation avec instructeur sur 1 à 2 saisons. Quel est le coût total pour obtenir le brevet ?',
+    desc:  'Moins de 25 ans, formation avec instructeur sur 2 saisons. Quel est le coût total pour obtenir le brevet ?',
   },
   {
     id:    'season',
@@ -42,7 +42,7 @@ const SCENARIOS = [
   {
     id:    'visit',
     title: 'Pilote visiteur (séjour court)',
-    desc:  'Breveté dans un autre club, je veux voler ici une semaine sur le DG500 avec un instructeur.',
+    desc:  'Breveté dans un autre club, je veux voler avec le Caen Falaise Planeurs une semaine sur le DG500 avec un instructeur.',
   },
 ];
 
