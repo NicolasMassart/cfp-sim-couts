@@ -96,7 +96,7 @@ export default function SeasonScenario() {
 
       <div className="control-row">
         <label>Durée moy. de vol</label>
-        <input type="range" min={0.5} max={5} step={0.5} value={dur}
+        <input type="range" min={0.5} max={8} step={0.5} value={dur}
           onChange={(e) => setDur(+e.target.value)} />
         <span className="control-val">{dur.toFixed(1).replace('.', ',')} h</span>
       </div>
