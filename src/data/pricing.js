@@ -134,15 +134,18 @@ export const LEARN_PARAMS = {
   s2InstrFlights: 5,  s2InstrDur: 1,      // 5 × 1 h
 
   // Season 2 phase B — circuit validation laps before first solo
-  tdpFlights: 6, tdpDur: 5 / 60,          // 6 × 5 min
+  tdpFlights: 10, tdpDur: 5 / 60,         // 10 × 5 min
   tdpTow:     5,                           // short tow: 5/100h
 
   // Season 2 phase C — solo flights after SPL
-  soloFlights: 10, soloDur: 1.25,         // 10 × 1 h 15
+  soloFlights: 10, soloDur: 11 / 12,      // 10 × 55 min
 
   // SF28 motorglider (winter off-season, no tow needed)
   sf28S1Hours: 6, sf28S2Hours: 4, sf28Rate: 60,  // €/h (winter rate; full rate is 80 €/h)
 
+  // Paid once at the start so students can log flights from day one
+  logbook: 16,
+
   // Standard tow per flight
-  towPer100h: 10,
+  towPer100h: 12,
 };

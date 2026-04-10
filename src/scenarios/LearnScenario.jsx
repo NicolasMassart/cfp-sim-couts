@@ -36,8 +36,8 @@ export default function LearnScenario() {
 
   // ════════════════════════════════════════════════════════════════════════════
   // SEASON 2 — two phases combined into a single package decision
-  // Phase A: 5 instructor flights × 1 h  + 6 circuit laps × 5 min
-  // Phase B: 10 solo flights × 1 h 15
+  // Phase A: 5 instructor flights × 1 h  + 10 circuit laps × 5 min
+  // Phase B: 10 solo flights × 55 min
   // ════════════════════════════════════════════════════════════════════════════
   const n2a  = LEARN_PARAMS.s2InstrFlights;
   const d2a  = LEARN_PARAMS.s2InstrDur;
@@ -68,9 +68,10 @@ export default function LearnScenario() {
 
   // ── Theory training (paid once, season 1) ─────────────────────────────────
   const eLearning = p.eLearning;
+  const logbook = LEARN_PARAMS.logbook;
 
   // ── Season totals ──────────────────────────────────────────────────────────
-  const total1     = fixed + best1.cost + i1 + t1 + sf28Cost1 + eLearning;
+  const total1     = fixed + best1.cost + i1 + t1 + sf28Cost1 + eLearning + logbook;
   const total2     = fixed + best2.cost + i2a + t2a + t2b + sf28Cost2;
   const grandTotal = total1 + total2;
 
@@ -84,53 +85,48 @@ export default function LearnScenario() {
     <>
       {/* ── Training path description (collapsible) ─────────────────────── */}
       <details className="fold" style={{ marginBottom: '1rem' }}>
-        <summary><span>Parcours « Apprendre à voler »</span></summary>
+        <summary>
+          <span>
+            Parcours « Apprendre à voler » : formation sur <strong>2 saisons</strong> en <strong>planeur école bois et toile</strong>,
+            avec vols <strong>instructeur et solo</strong>, complétée par la formation en <strong>motoplaneur SF 28</strong>, le passage de
+            l'<strong>examen théorique SPL</strong> et la fourniture du <strong>carnet de vol</strong>.
+          </span>
+        </summary>
         <div className="fold-body">
           <ul style={{ listStyle: 'disc', fontSize: '12px', lineHeight: 2, paddingLeft: '1rem', margin: 0 }}>
             <li>Tarif <strong>bois et toile</strong> · formation sur <strong>2 saisons</strong></li>
             <li>Saison 1 (formation avec instructeur) : <strong>15 vols × 1 h</strong> en planeur pur</li>
             <li>
               Saison 2 (fin de formation + 1er solo) : <strong>5 vols × 1 h</strong> avec instructeur ·
-              puis <strong>6 tours de piste × 5 min</strong> pour valider décollage/atterrissage ·
-              puis <strong>10 vols × 1 h 15</strong> en solo
+              puis <strong>10 tours de piste × 5 min</strong> pour valider décollage/atterrissage ·
+              puis <strong>10 vols × 55 min</strong> en solo
             </li>
             <li>
               Motoplaneur SF 28 (sept.–avr.) : <strong>6 h en saison 1 + 4 h en saison 2</strong> ·
               60 €/h · avec instructeur · instruction gratuite hors saison · sans remorquage
             </li>
-            <li>Remorquage moyen : <strong>10/100h</strong> par vol · <strong>5/100h</strong> pour les tours de piste</li>
+            <li>Remorquage moyen : <strong>12/100h</strong> par vol · <strong>5/100h</strong> pour les tours de piste</li>
           </ul>
         </div>
       </details>
 
-      {/* ── BIA checkbox ─────────────────────────────────────────────────── */}
+      {/* ── BIA question + checkbox ──────────────────────────────────────── */}
+      <p style={{ fontSize: '12px', color: 'var(--text-mid)', margin: '0 0 .45rem' }}>
+        Dis-nous si tu as obtenu ton BIA : si oui, cela augmente le montant de certaines bourses fédérales FFVP.
+      </p>
       <label className="check-row">
         <input type="checkbox" checked={hasBIA} onChange={(e) => setHasBIA(e.target.checked)} />
         J'ai mon BIA
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '2px' }}>
-          (Brevet d'Initiation Aéronautique — majore certaines bourses FFVP)
-        </span>
       </label>
 
-      {/* ── Season 1 & 2 headline totals ─────────────────────────────────── */}
-      <div className="metrics" style={{ marginTop: '1.25rem' }}>
-        <div className="metric-card">
-          <p className="metric-label">Saison 1</p>
-          <p className="metric-value">{fmt(total1)}</p>
-          <p className="metric-sub">Formation initiale en moto-planeur incluse</p>
-        </div>
-        <div className="metric-card">
-          <p className="metric-label">Saison 2</p>
-          <p className="metric-value">{fmt(total2)}</p>
-          <p className="metric-sub">Formation initiale en moto-planeur incluse</p>
-        </div>
-      </div>
-
       {/* ── Season 1 detail (collapsible) ────────────────────────────────── */}
-      <details className="fold">
+      <details className="fold learn-season-fold" style={{ marginTop: '1.25rem' }}>
         <summary>
-          <span>Saison 1 — Formation instructeur · 15 vols × 1 h + SF 28 {LEARN_PARAMS.sf28S1Hours} h</span>
-          <span className="fold-total">{fmt(total1)}</span>
+          <div className="learn-season-summary">
+            <p className="metric-label">Saison 1</p>
+            <p className="metric-value">{fmt(total1)}</p>
+            <p className="metric-sub">Formation instructeur · 15 vols × 1 h + SF 28 {LEARN_PARAMS.sf28S1Hours} h</p>
+          </div>
         </summary>
         <div className="fold-body">
           <table className="breakdown">
@@ -140,6 +136,10 @@ export default function LearnScenario() {
               <tr>
                 <td>Formation théorique <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(e-learning · examen SPL)</span></td>
                 <td>{fmt(eLearning)}</td>
+              </tr>
+              <tr>
+                <td>Carnet de vol <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(vendu aux élèves)</span></td>
+                <td>{fmt(logbook)}</td>
               </tr>
               <tr className="section-head"><td colSpan={2}>Heures de vol — planeur pur (bois et toile)</td></tr>
               <tr><td>{best1.label}</td><td>{fmt(s1PkgBase)}</td></tr>
@@ -154,7 +154,7 @@ export default function LearnScenario() {
                 <td>{fmt(i1)}</td>
               </tr>
               <tr>
-                <td>Remorquage <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n1} vols × 10/100h</span></td>
+                <td>Remorquage <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n1} vols × 12/100h</span></td>
                 <td>{fmt(t1)}</td>
               </tr>
               <tr>
@@ -168,10 +168,13 @@ export default function LearnScenario() {
       </details>
 
       {/* ── Season 2 detail (collapsible) ────────────────────────────────── */}
-      <details className="fold">
+      <details className="fold learn-season-fold">
         <summary>
-          <span>Saison 2 — Fin de formation + 1er solo (10 × 1h15) + SF 28 {LEARN_PARAMS.sf28S2Hours} h</span>
-          <span className="fold-total">{fmt(total2)}</span>
+          <div className="learn-season-summary">
+            <p className="metric-label">Saison 2</p>
+            <p className="metric-value">{fmt(total2)}</p>
+            <p className="metric-sub">Fin de formation + 1er solo (10 × 55 min) + SF 28 {LEARN_PARAMS.sf28S2Hours} h</p>
+          </div>
         </summary>
         <div className="fold-body">
           <table className="breakdown">
@@ -191,7 +194,7 @@ export default function LearnScenario() {
                 <td>{fmt(i2a)}</td>
               </tr>
               <tr>
-                <td>Remorquage <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n2a} vols × 10/100h · {nTdp} tours de piste × {LEARN_PARAMS.tdpTow}/100h · {n2b} vols solo × 10/100h</span></td>
+                <td>Remorquage <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n2a} vols × 12/100h · {nTdp} tours de piste × {LEARN_PARAMS.tdpTow}/100h · {n2b} vols solo × 12/100h</span></td>
                 <td>{fmt(t2a + t2b)}</td>
               </tr>
               <tr>
@@ -214,7 +217,7 @@ export default function LearnScenario() {
         <div className="metric-card green">
           <p className="metric-label">Avec bourses de formation FFVP</p>
           <p className="metric-value">{fmt(Math.max(0, grandTotal - totalTraining))}</p>
-          <p className="metric-sub">Après −{fmt(totalTraining)} de bourses{hasBIA ? ' (BIA)' : ''}</p>
+          <p className="metric-sub">Après −{fmt(totalTraining)} de bourses{hasBIA ? ' (avantage BIA inclus)' : ''}</p>
         </div>
       </div>
 

@@ -452,6 +452,34 @@ details.fold summary .fold-total {
   flex-shrink:  0;
 }
 
+/* Card-like fold header used for the Learn scenario season blocks.
+   This removes a duplicate headline card while keeping the breakdown collapsible. */
+details.fold.learn-season-fold summary {
+  padding: 1rem 1.1rem;
+}
+
+details.fold.learn-season-fold summary::after {
+  margin-left: 1rem;
+}
+
+.learn-season-summary {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+  flex:           1;
+  min-width:      0;
+}
+
+details.fold.learn-season-fold summary .metric-sub {
+  max-width:   32rem;
+  line-height: 1.45;
+}
+
+details.fold.learn-season-fold[open] .fold-body {
+  border-top:  1px solid var(--surface);
+  padding-top: .85rem;
+}
+
 /* Content area inside the open panel */
 details.fold .fold-body { padding: 0 1rem .9rem; }
 details.fold .fold-body .breakdown td:first-child { padding-left: 2px; }
