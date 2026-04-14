@@ -2,3 +2,12 @@ node_modules
 *.local
 vite.config.js.timestamp-*.mjs
 dist/
+.DS_Store
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.env
